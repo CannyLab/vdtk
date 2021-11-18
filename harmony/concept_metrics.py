@@ -1,4 +1,3 @@
-import itertools
 import logging
 import os
 from collections import defaultdict
