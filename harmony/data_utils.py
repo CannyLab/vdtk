@@ -47,7 +47,7 @@ class Sample:
 
     @property
     def references_tokenized_text(self) -> List[List[str]]:
-        return [[r.text for r in ref] for ref in self.references_tokenized]
+        return [[r.text.lower() for r in ref] for ref in self.references_tokenized]
 
     @property
     def references_tokenized_pos(self) -> List[List[Tuple[Any, Any]]]:

@@ -10,23 +10,6 @@ from rich.progress import track
 from harmony.data_utils import load_dataset
 
 
-def descr(a: np.ndarray):
-    """Generate descriptive statistics for the array a"""
-    return {
-        "mean": np.nanmean(a),
-        "median": np.nanmedian(a),
-        "max": np.nanmax(a),
-        "min": np.nanmin(a),
-        "stddev": np.nanstd(a),
-        "25q": np.quantile(a, 0.25),
-        "75q": np.quantile(a, 0.75),
-        "s95ci": (
-            np.nanmean(a) - 1.96 * np.nanstd(a) / np.sqrt(len(a)),
-            np.nanmean(a) + 1.96 * np.nanstd(a) / np.sqrt(len(a)),
-        ),
-    }
-
-
 @click.command()
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
