@@ -6,9 +6,9 @@ from typing import Optional
 import click
 import numpy as np
 import rich
-import tqdm
 from fuzzysearch import find_near_matches
 from fuzzywuzzy import process
+from rich.progress import track
 
 from harmony.data_utils import load_dataset
 
@@ -43,7 +43,7 @@ def _compute_overlap(data, concept_set, fuzzy: bool = False, fuzzy_threshold: in
     concepts = _load_concepts(CONCEPT_SETS[concept_set])
     matched_captions = defaultdict(set)
     matches = []
-    for sample in tqdm.tqdm(data, leave=False):
+    for sample in track(data, transient=True, description=f"Computing {concept_set} overlap"):
         sample_matched = False
         for reference in sample.references:
             for concept in concepts:

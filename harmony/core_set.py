@@ -1,12 +1,13 @@
 import itertools
 import logging
+import time
 
 import click
 import nltk
 import numpy as np
 import rich
-import tqdm
 from mpire import WorkerPool
+from rich.progress import track
 
 from harmony.data_utils import load_dataset
 
@@ -20,13 +21,18 @@ def _greedy_max_coverage(s):
     target_coverage = set(list(itertools.chain.from_iterable(s)))
     covered = set()
     cover = []
-    with tqdm.tqdm(total=100, leave=False) as pbar:
+    last_coverage_len = 0
+    with rich.progress.Progress(transient=True) as progress:
+        cover_progress = progress.add_task("Building cover", total=100)
         for i in range(len(s)):
             max_subset_index, max_subset = max(enumerate(s), key=lambda x: len(x[1] - covered))
             cover.append(max_subset_index)
             covered |= max_subset
             remaining = len(target_coverage - covered)
-            pbar.update(int(((len(target_coverage) - remaining) / len(target_coverage)) * 100) - pbar.n)
+            progress.update(
+                cover_progress, advance=int(100 * (len(covered) - last_coverage_len) / len(target_coverage))
+            )
+            last_coverage_len = len(covered)
             if remaining == 0:
                 break
     return cover
@@ -52,10 +58,17 @@ def coreset(dataset_path: str, train_split: str, test_split: str, metric: str = 
     # Compute the full set of hypotheses
     logging.info("Computing/tokenizing hypotheses...")
     hypotheses = list(
-        itertools.chain.from_iterable([t.references_tokenized_text for t in tqdm.tqdm(train_data, leave=False)])
+        itertools.chain.from_iterable(
+            [
+                t.references_tokenized_text
+                for t in track(train_data, transient=True, description="Tokenizing Hypotheses")
+            ]
+        )
     )
     logging.info("Tokenizing test set...")
-    validation_samples = [s.references_tokenized_text for s in tqdm.tqdm(test_data, leave=False)]
+    validation_samples = [
+        s.references_tokenized_text for s in track(test_data, transient=True, description="Tokenizing Test Set")
+    ]
 
     _metric_func = METRIC_FUNCTIONS[metric]
 

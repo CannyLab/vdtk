@@ -5,7 +5,7 @@ from typing import Optional
 import click
 import numpy as np
 import rich
-import tqdm
+from rich.progress import track
 
 from harmony.data_utils import load_dataset
 
@@ -100,7 +100,7 @@ def _count_nouns_and_verbs(data):
     verb_counts = Counter()
     sample_noun_counts = []
     sample_verb_counts = []
-    for sample in tqdm.tqdm(data, leave=False):
+    for sample in track(data, transient=True, description="Counting Nouns and Verbs"):
         sample_noun_counts.append(Counter())
         sample_verb_counts.append(Counter())
         for reference in sample.references_tokenized_pos:
@@ -117,7 +117,7 @@ def _count_nouns_and_verbs(data):
 def _count_tokens(data):
     vocab_counts = Counter()
     sample_vocabs = []
-    for sample in tqdm.tqdm(data, leave=False):
+    for sample in track(data, transient=True, description="Counting Tokens"):
         sample_vocab = Counter()
         for reference in sample.references_tokenized_text:
             vocab_counts.update(reference)

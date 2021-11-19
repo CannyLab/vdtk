@@ -2,7 +2,7 @@ from collections import defaultdict
 from typing import List, Sequence
 
 import numpy as np
-import tqdm
+from rich.progress import track
 
 
 def _dd1():
@@ -25,7 +25,7 @@ class NGramLM:
         self._count = 0
         self._n = n
 
-        for sample in tqdm.tqdm(samples, leave=False):
+        for sample in track(samples, transient=True, description="Training"):
             for ngram in find_ngrams(sample, n):
                 self._model[ngram[:-1]][ngram[-1]] += 1
                 self._count += 1

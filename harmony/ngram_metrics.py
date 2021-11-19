@@ -5,7 +5,7 @@ from typing import Optional
 import click
 import numpy as np
 import rich
-import tqdm
+from rich.progress import track
 
 from harmony.data_utils import load_dataset
 from harmony.lm import NGramLM
@@ -43,7 +43,12 @@ def ngram_stats(dataset_path: str, split: Optional[str] = None) -> None:
     # Build the n-gram language models
     logging.info("Tokenizing samples...")
     tokenized_data = list(
-        itertools.chain.from_iterable([sample.references_tokenized_text for sample in tqdm.tqdm(data, leave=False)])
+        itertools.chain.from_iterable(
+            [
+                sample.references_tokenized_text
+                for sample in track(data, transient=True, description="Tokenizing Samples")
+            ]
+        )
     )
     logging.info("Building language models...")
     two_lm = NGramLM(tokenized_data, 2)
