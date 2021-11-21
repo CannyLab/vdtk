@@ -50,6 +50,10 @@ class Sample:
         return [[r.text.lower() for r in ref] for ref in self.references_tokenized]
 
     @property
+    def references_tokenized_lemma(self) -> List[List[str]]:
+        return [[r.lemma_.lower() for r in ref] for ref in self.references_tokenized]
+
+    @property
     def references_tokenized_pos(self) -> List[List[Tuple[Any, Any]]]:
         return [[(r.lemma_, r.pos_) for r in ref] for ref in self.references_tokenized]
 

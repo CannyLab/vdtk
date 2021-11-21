@@ -38,7 +38,7 @@ available for use:
 | ----------- | ----------- |
 | vocab-stats | Run with `harmony-cli vocab-stats DATASET_JSON_PATH`. Compute basic token-level vocab statistics |
 | ngram-stats | Run with `harmony-cli ngram-stats DATASET_JSON_PATH`. Compute n-gram statistics, EVS@N and ED@N  |
-| **[TODO]** caption-stats | Run with `harmony-cli caption-stats DATASET_JSON_PATH`. Compute caption-level dataset statistics  |
+| caption-stats | Run with `harmony-cli caption-stats DATASET_JSON_PATH`. Compute caption-level dataset statistics  |
 | semantic-variance | Run with `harmony-cli semantic-variance DATASET_JSON_PATH`. Compute within-sample BERT embedding semantic variance |
 | coreset | Run with `harmony-cli coreset DATASET_JSON_PATH`. Compute the caption coreset from the training split needed to solve the validation split |
 | concept-overlap | Run with `harmony-cli concept-overlap DATASET_JSON_PATH`. Compute the concept overlap between popular feature extractors, and the dataset |

@@ -4,6 +4,7 @@ import warnings
 import click
 from rich.logging import RichHandler
 
+from harmony.caption_metrics import caption_stats
 from harmony.concept_metrics import concept_leave_one_out, concept_overlap
 from harmony.core_set import coreset
 from harmony.leave_one_out import leave_one_out
@@ -31,6 +32,7 @@ cli.add_command(coreset)
 cli.add_command(semantic_variance)
 cli.add_command(leave_one_out)
 cli.add_command(concept_leave_one_out)
+cli.add_command(caption_stats)
 
 if __name__ == "__main__":
     cli()
