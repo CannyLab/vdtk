@@ -4,7 +4,7 @@ import warnings
 import click
 from rich.logging import RichHandler
 
-from harmony.concept_metrics import concept_overlap
+from harmony.concept_metrics import concept_leave_one_out, concept_overlap
 from harmony.core_set import coreset
 from harmony.leave_one_out import leave_one_out
 from harmony.ngram_metrics import ngram_stats
@@ -30,6 +30,7 @@ cli.add_command(concept_overlap)
 cli.add_command(coreset)
 cli.add_command(semantic_variance)
 cli.add_command(leave_one_out)
+cli.add_command(concept_leave_one_out)
 
 if __name__ == "__main__":
     cli()

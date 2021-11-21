@@ -1,4 +1,3 @@
-import itertools
 import logging
 import random
 from typing import Optional
@@ -42,7 +41,10 @@ def _loo_worker_fn(worker_state, hypotheses, ground_truths):
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
 @click.option("--iterations", default=750, type=click.IntRange(min=1), help="Number of iterations to run")
-def leave_one_out(dataset_path: str, split: Optional[str] = None, iterations: int = 750) -> None:
+@click.option("--max-gt-size", default=None, type=int, help="Maximum number of ground truth sentences to use")
+def leave_one_out(
+    dataset_path: str, split: Optional[str] = None, iterations: int = 750, max_gt_size: Optional[int] = None
+) -> None:
 
     logging.info("Loading dataset...")
     data = load_dataset(dataset_path)
@@ -58,8 +60,10 @@ def leave_one_out(dataset_path: str, split: Optional[str] = None, iterations: in
         s_idx = (random.randint(0, len(c.references) - 1) for c in data)
         hypotheses = [tuple(c.references_tokenized_text[i]) for c, i in zip(data, s_idx)]
         ground_truths = [
-            set(tuple(r) for r in c.references_tokenized_text if tuple(r) != h) for c, h in zip(data, hypotheses)
+            list(set(tuple(r)) for r in c.references_tokenized_text if tuple(r) != h) for c, h in zip(data, hypotheses)
         ]
+        if max_gt_size is not None:
+            ground_truths = [random.sample(gt_set, min(len(gt_set), max_gt_size)) for gt_set in ground_truths]
         experiments.append(
             {
                 "ground_truths": {i: [" ".join(g) for g in gt] for i, gt in enumerate(ground_truths)},
