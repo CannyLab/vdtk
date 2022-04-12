@@ -8,6 +8,7 @@ import rich
 from rich.progress import track
 
 from harmony.data_utils import load_dataset
+from harmony.stats_utils import descr
 
 
 @click.command()
