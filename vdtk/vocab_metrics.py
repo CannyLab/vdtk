@@ -7,7 +7,7 @@ import numpy as np
 import rich
 from rich.progress import track
 
-from harmony.data_utils import load_dataset
+from vdtk.data_utils import load_dataset
 
 
 def _compute_head_tokens(vocab_counts, ratio: float = 0.9):

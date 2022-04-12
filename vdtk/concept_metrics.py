@@ -11,10 +11,10 @@ from fuzzywuzzy import process
 from mpire import WorkerPool
 from rich.progress import track
 
-from harmony.data_utils import load_dataset
-from harmony.metrics.bleu.bleu import Bleu
-from harmony.metrics.meteor.meteor import Meteor
-from harmony.metrics.rouge.rouge import Rouge
+from vdtk.data_utils import load_dataset
+from vdtk.metrics.bleu.bleu import Bleu
+from vdtk.metrics.meteor.meteor import Meteor
+from vdtk.metrics.rouge.rouge import Rouge
 
 CONCEPT_SETS = {
     "Places365": os.path.join(os.path.dirname(__file__), "assets/places_labels.txt"),

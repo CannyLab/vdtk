@@ -9,7 +9,7 @@ import rich
 from mpire import WorkerPool
 from rich.progress import track
 
-from harmony.data_utils import load_dataset
+from vdtk.data_utils import load_dataset
 
 METRIC_FUNCTIONS = {
     "BLEU": lambda x, y: nltk.translate.bleu_score.sentence_bleu(y, x),

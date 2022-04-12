@@ -9,9 +9,9 @@ import numpy as np
 import rich
 from rich.progress import track
 
-from harmony.data_utils import load_dataset
-from harmony.metrics.bleu.bleu import Bleu
-from harmony.stats_utils import descr
+from vdtk.data_utils import load_dataset
+from vdtk.metrics.bleu.bleu import Bleu
+from vdtk.stats_utils import descr
 
 
 @click.command()

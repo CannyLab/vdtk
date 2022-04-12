@@ -7,8 +7,8 @@ import numpy as np
 import rich
 from rich.progress import track
 
-from harmony.data_utils import load_dataset
-from harmony.lm import NGramLM
+from vdtk.data_utils import load_dataset
+from vdtk.lm import NGramLM
 
 
 def _compute_evs(model: NGramLM) -> float:

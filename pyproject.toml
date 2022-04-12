@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "harmony"
+name = "vdtk"
 version = "0.1.0"
 description = ""
 authors = ["DavidMChan <davidchan@berkeley.edu>"]
 readme = "README.md"
-include = ["README.md", "LICENSE", "harmony/assets/*.txt"]
+include = ["README.md", "LICENSE", "vdtk/assets/*.txt"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -45,7 +45,7 @@ flake8 = "^4.0.1"
 mypy = "^0.910"
 
 [tool.poetry.scripts]
-harmony-cli = 'harmony.cli:cli'
+vdtk-cli = 'vdtk.cli:cli'
 
 [build-system]
 requires = ["poetry-core"]

@@ -4,14 +4,14 @@ import warnings
 import click
 from rich.logging import RichHandler
 
-from harmony.caption_metrics import caption_stats
-from harmony.concept_metrics import concept_leave_one_out, concept_overlap
-from harmony.core_set import coreset
-from harmony.leave_one_out import leave_one_out
-from harmony.ngram_metrics import ngram_stats
-from harmony.qualitative_sample import qualitative_sample
-from harmony.semantic_variance import semantic_variance
-from harmony.vocab_metrics import vocab_stats
+from vdtk.caption_metrics import caption_stats
+from vdtk.concept_metrics import concept_leave_one_out, concept_overlap
+from vdtk.core_set import coreset
+from vdtk.leave_one_out import leave_one_out
+from vdtk.ngram_metrics import ngram_stats
+from vdtk.qualitative_sample import qualitative_sample
+from vdtk.semantic_variance import semantic_variance
+from vdtk.vocab_metrics import vocab_stats
 
 FORMAT = "%(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])

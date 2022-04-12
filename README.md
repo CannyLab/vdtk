@@ -1,4 +1,4 @@
-# Harmony: Visual Description Evaluation Data Tools
+# vdtk: Visual Description Evaluation Data Tools
 
 This tool is designed to allow for a deep investigation of diversity in visual description datasets, and to help users
 understand their data at a token, n-gram, description, and dataset level.
@@ -31,20 +31,20 @@ In order to prepare datasets to work with this tool, datasets must be formatted 
 
 ## Usage
 
-After installation, the basic menu of commands can be accessed with `harmony-cli --help`. We make several experiments/tools
+After installation, the basic menu of commands can be accessed with `vdtk-cli --help`. We make several experiments/tools
 available for use:
 
 | Command | Details |
 | ----------- | ----------- |
-| vocab-stats | Run with `harmony-cli vocab-stats DATASET_JSON_PATH`. Compute basic token-level vocab statistics |
-| ngram-stats | Run with `harmony-cli ngram-stats DATASET_JSON_PATH`. Compute n-gram statistics, EVS@N and ED@N  |
-| caption-stats | Run with `harmony-cli caption-stats DATASET_JSON_PATH`. Compute caption-level dataset statistics  |
-| semantic-variance | Run with `harmony-cli semantic-variance DATASET_JSON_PATH`. Compute within-sample BERT embedding semantic variance |
-| coreset | Run with `harmony-cli coreset DATASET_JSON_PATH`. Compute the caption coreset from the training split needed to solve the validation split |
-| concept-overlap | Run with `harmony-cli concept-overlap DATASET_JSON_PATH`. Compute the concept overlap between popular feature extractors, and the dataset |
-| concept-leave-one-out | Run with `harmony-cli concept-leave-one-out DATASET_JSON_PATH`. Compute the performance with a coreset of concept captions |
-| leave-one-out | Run with `harmony-cli vocab-stats DATASET_JSON_PATH`. Compute leave-one-out ground truth performance on a dataset with multiple ground truths |
-| **[BETA]** balanced-split | Run with `harmony-cli balanced-split DATASET_JSON_PATH`. Compute a set of splits of the data which best balance the data diversity |
+| vocab-stats | Run with `vdtk-cli vocab-stats DATASET_JSON_PATH`. Compute basic token-level vocab statistics |
+| ngram-stats | Run with `vdtk-cli ngram-stats DATASET_JSON_PATH`. Compute n-gram statistics, EVS@N and ED@N  |
+| caption-stats | Run with `vdtk-cli caption-stats DATASET_JSON_PATH`. Compute caption-level dataset statistics  |
+| semantic-variance | Run with `vdtk-cli semantic-variance DATASET_JSON_PATH`. Compute within-sample BERT embedding semantic variance |
+| coreset | Run with `vdtk-cli coreset DATASET_JSON_PATH`. Compute the caption coreset from the training split needed to solve the validation split |
+| concept-overlap | Run with `vdtk-cli concept-overlap DATASET_JSON_PATH`. Compute the concept overlap between popular feature extractors, and the dataset |
+| concept-leave-one-out | Run with `vdtk-cli concept-leave-one-out DATASET_JSON_PATH`. Compute the performance with a coreset of concept captions |
+| leave-one-out | Run with `vdtk-cli vocab-stats DATASET_JSON_PATH`. Compute leave-one-out ground truth performance on a dataset with multiple ground truths |
+| **[BETA]** balanced-split | Run with `vdtk-cli balanced-split DATASET_JSON_PATH`. Compute a set of splits of the data which best balance the data diversity |
 
 For more details and options, see the `--help` command for any of the commands above. Note that some tools are relatively
 compute intensive. This toolkit will make use of a GPU if available and necessary, as well as a large number of CPU cores
