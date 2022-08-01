@@ -34,7 +34,8 @@ rich = "^10.14.0"
 msgpack = "^1.0.2"
 mpire = "^2.3.1"
 click = "^8.0.3"
-en-core-web-lg = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.2.0/en_core_web_lg-3.2.0-py3-none-any.whl"}
+# Removed for now because we can't upload this to pypi
+# en-core-web-lg = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.2.0/en_core_web_lg-3.2.0-py3-none-any.whl"}
 fuzzysearch = "^0.7.3"
 sentence-transformers = "^2.1.0"
 
