@@ -5,6 +5,8 @@ description = ""
 authors = ["DavidMChan <davidchan@berkeley.edu>"]
 readme = "README.md"
 include = ["README.md", "LICENSE", "vdtk/assets/*.txt"]
+homepage = "https://github.com/CannyLab/vdtk"
+repository = "https://github.com/CannyLab/vdtk"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
