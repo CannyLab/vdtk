@@ -66,10 +66,18 @@ class Sample:
         return self._reference_embeddings
 
 
-def load_dataset(dataset_json_path: str) -> List[Sample]:
+def load_dataset(dataset_json_path: str, reference_key: str = "references") -> List[Sample]:
     """
     Loads the dataset from the json file.
     """
     with open(dataset_json_path) as f:
         dataset = json.load(f)
-    return [Sample(**sample) for sample in dataset]
+    return [
+        Sample(
+            _id=sample.get("_id", None),
+            split=sample.get("split", None),
+            references=sample.get(reference_key, []),
+            metadata=sample.get("metadata", None),
+        )
+        for sample in dataset
+    ]

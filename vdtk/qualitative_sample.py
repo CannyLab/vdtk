@@ -18,10 +18,13 @@ from vdtk.stats_utils import descr
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
 @click.option("--samples", default=1, type=int, help="The number of samples to get")
-def qualitative_sample(dataset_path: str, split: Optional[str] = None, samples: int = 1) -> None:
+@click.option("--reference-key", default="references", type=str, help="Reference key to evaluate")
+def qualitative_sample(
+    dataset_path: str, split: Optional[str] = None, samples: int = 1, reference_key: str = "references"
+) -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path)
+    data = load_dataset(dataset_path, reference_key=reference_key)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]

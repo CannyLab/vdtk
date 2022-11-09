@@ -12,6 +12,7 @@ from vdtk.ngram_metrics import ngram_stats
 from vdtk.qualitative_sample import qualitative_sample
 from vdtk.semantic_variance import semantic_variance
 from vdtk.vocab_metrics import vocab_stats
+from vdtk.score import score
 
 FORMAT = "%(message)s"
 logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
@@ -35,6 +36,7 @@ cli.add_command(leave_one_out)
 cli.add_command(concept_leave_one_out)
 cli.add_command(caption_stats)
 cli.add_command(qualitative_sample)
+cli.add_command(score)
 
 if __name__ == "__main__":
     cli()

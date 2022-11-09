@@ -25,6 +25,12 @@ In order to prepare datasets to work with this tool, datasets must be formatted 
             "reference 1...",
             "reference 2...",
         ],
+        "candidates": [
+            // List of string candidates (Optional)
+            "candidate 1...",
+            "candidate 2...",
+        ],
+        "media_path": "string", // (Optional) Path to the image/video (for image/video based metrics, recall experiemnts, etc.)
         "metadata": {} // Any JSON object. This field is not used by the toolkit at this time.
     }
 ]
@@ -46,6 +52,15 @@ available for use:
 | concept-leave-one-out | Run with `vdtk-cli concept-leave-one-out DATASET_JSON_PATH`. Compute the performance with a coreset of concept captions |
 | leave-one-out | Run with `vdtk-cli vocab-stats DATASET_JSON_PATH`. Compute leave-one-out ground truth performance on a dataset with multiple ground truths |
 | **[BETA]** balanced-split | Run with `vdtk-cli balanced-split DATASET_JSON_PATH`. Compute a set of splits of the data which best balance the data diversity |
+
+Additionally, several commands take multiple dataset JSONs, which can be used to compare different runs, or different datasets. Appending (:baseline) to any
+of the JSON file paths will treat this run as a baseline, and compute relative values and coloring accordingly (example: `vdtk-cli score cider-d ./baseline.json:baseline ./model.json`).
+
+| Command | Details |
+| ----------- | ----------- |
+| **[ALPHA]** score | Run with `vdtk-cli score [metric(s)] DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute BLEU/METEOR/CIDEr-D/ROUGE/BERTScore/MAUVE/etc. Guaranteed to be consistent with the COCO captioning tools (for use externally). |
+| **[ALPHA]** clip-recall | Run with `vdtk-cli clip-recall DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute the MRR, and Recall@K values for candidate/reference captions based on the CLIP model. |
+| **[ALPHA]** content-recall | Run with `vdtk-cli content-recall DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute Noun/Verb recall for the candidates against the references. |
 
 For more details and options, see the `--help` command for any of the commands above. Note that some tools are relatively
 compute intensive. This toolkit will make use of a GPU if available and necessary, as well as a large number of CPU cores

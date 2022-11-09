@@ -42,12 +42,17 @@ def _loo_worker_fn(worker_state, hypotheses, ground_truths):
 @click.option("--split", default=None, type=str, help="Split to evaluate")
 @click.option("--iterations", default=750, type=click.IntRange(min=1), help="Number of iterations to run")
 @click.option("--max-gt-size", default=None, type=int, help="Maximum number of ground truth sentences to use")
+@click.option("--reference-key", default="references", type=str, help="Reference key to evaluate")
 def leave_one_out(
-    dataset_path: str, split: Optional[str] = None, iterations: int = 750, max_gt_size: Optional[int] = None
+    dataset_path: str,
+    split: Optional[str] = None,
+    iterations: int = 750,
+    max_gt_size: Optional[int] = None,
+    reference_key: str = "references",
 ) -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path)
+    data = load_dataset(dataset_path, reference_key=reference_key)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]

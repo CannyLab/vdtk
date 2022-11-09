@@ -127,12 +127,17 @@ def _leave_one_out(data, concept_overlap, concept_set, fuzzy, fuzzy_threshold):
 @click.option("--split", default=None, type=str, help="Split to evaluate")
 @click.option("--fuzzy", default=False, type=bool, help="Use fuzzy matching")
 @click.option("--fuzzy-threshold", default=90, type=click.IntRange(0, 100), help="Fuzzy matching threshold")
+@click.option("--reference-key", default="references", type=str, help="Key to use for references")
 def concept_overlap(
-    dataset_path: str, split: Optional[str] = None, fuzzy: bool = False, fuzzy_threshold: int = 90
+    dataset_path: str,
+    split: Optional[str] = None,
+    fuzzy: bool = False,
+    fuzzy_threshold: int = 90,
+    reference_key: str = "references",
 ) -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path)
+    data = load_dataset(dataset_path, reference_key=reference_key)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]

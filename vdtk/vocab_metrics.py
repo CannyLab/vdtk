@@ -22,12 +22,12 @@ def _compute_head_tokens(vocab_counts, ratio: float = 0.9):
 
 def _compute_ws_uniqueness(sample_vocabs):
     # Number of tokens which are unique within a sample
-    return [len([i for i in sv.values() if i == 1]) / len(sv) for sv in sample_vocabs]
+    return [len([i for i in sv.values() if i == 1]) / (len(sv) + 1e-8) for sv in sample_vocabs]
 
 
 def _compute_bs_uniqueness(vocab_counts, sample_vocabs):
     # Number of tokens which are unique to only one sample per sample
-    return [len([i for i in sv.keys() if vocab_counts[i] == 1]) / sum(sv.values()) for sv in sample_vocabs]
+    return [len([i for i in sv.keys() if vocab_counts[i] == 1]) / (sum(sv.values()) + 1e-8) for sv in sample_vocabs]
 
 
 def _compute_vocab_stats(vocab_counts, sample_vocabs):
@@ -129,10 +129,11 @@ def _count_tokens(data):
 @click.command()
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
-def vocab_stats(dataset_path: str, split: Optional[str] = None) -> None:
+@click.option("--reference-key", default="references", type=str, help="Reference key to evaluate")
+def vocab_stats(dataset_path: str, split: Optional[str] = None, reference_key: str = "references") -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path)
+    data = load_dataset(dataset_path, reference_key=reference_key)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]

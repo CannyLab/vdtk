@@ -30,10 +30,11 @@ def _compute_ed(ls, evs_2, evs_3, evs_4):
 @click.command()
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
-def ngram_stats(dataset_path: str, split: Optional[str] = None) -> None:
+@click.option("--reference-key", default="references", type=str, help="Reference key to evaluate")
+def ngram_stats(dataset_path: str, split: Optional[str] = None, reference_key: str = "references") -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path)
+    data = load_dataset(dataset_path, reference_key=reference_key)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]
