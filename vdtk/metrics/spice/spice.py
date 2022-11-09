@@ -78,8 +78,8 @@ class Spice:
         subprocess.check_call(
             spice_cmd,
             cwd=os.path.dirname(os.path.abspath(__file__)),
-            # stderr=subprocess.DEVNULL,
-            # stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
         )
 
         # Read and process results

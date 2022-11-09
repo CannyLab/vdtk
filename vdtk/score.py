@@ -1,44 +1,84 @@
-import click
 import os
+import json
+import itertools
+from typing import Sequence, List, Tuple, Any, Optional
+
+import click
 import numpy as np
 import rich
 from rich.table import Table
-from typing import Sequence, List, Tuple, Any
-import json
-from typing import Optional
-from pycocoevalcap.cider.cider import Cider
+from rich.progress import track
+import torch
 
 # from vdtk.metrics.bleu.bleu import Bleu
 from vdtk.metrics.bleu.bleu import Bleu
+from pycocoevalcap.cider.cider import Cider
 from pycocoevalcap.rouge.rouge import Rouge
 from pycocoevalcap.meteor.meteor import Meteor
 from vdtk.metrics.spice.spice import Spice
 from vdtk.metrics.tokenizer.ptbtokenizer import PTBTokenizer
 
-PUNCTUATIONS = [
-    "''",
-    "'",
-    "``",
-    "`",
-    "-LRB-",
-    "-RRB-",
-    "-LCB-",
-    "-RCB-",
-    ".",
-    "?",
-    "!",
-    ",",
-    ":",
-    "-",
-    "--",
-    "...",
-    ";",
-]
+from vdtk.metrics.distribution import (
+    TriangleRankMetricScorer,
+    MetricScorer,
+    MMDBertMetricScorer,
+    MMDCLIPMetricScorer,
+    MMDFastTextMetricScorer,
+    MMDGloveMetricScorer,
+)
+from vdtk.metrics.distribution.distance import (
+    BLEU4Distance,
+    CIDERDDistance,
+    MeteorDistance,
+    ROUGELDistance,
+    BLEURTDistance,
+    BERTDistance,
+    BERTScoreDistance,
+)
+
+
+from bleurt import score as bleurt_score
+from bert_score import BERTScorer
+import mauve
 
 
 @click.group()
 def score():
     pass
+
+
+def _distribution_metric(
+    scorer: MetricScorer,
+    dataset_paths: Sequence[str],
+    split: str,
+):
+    tokenizer = PTBTokenizer()
+
+    # Load the paths
+    outputs = []
+    for path in dataset_paths:
+        # Load the candidates and references from the dataset
+        with open(path, "r") as f:
+            data = json.load(f)
+            candidates = {
+                sample.get("_id", i): sample["candidates"]
+                for i, sample in enumerate(data)
+                if sample.get("split", None) == split or split is None
+            }
+            references = {
+                sample.get("_id", i): sample["references"]
+                for i, sample in enumerate(data)
+                if sample.get("split", None) == split or split is None
+            }
+            references = tokenizer.tokenize(references)
+            candidates = tokenizer.tokenize(candidates)
+
+        scores = scorer(candidates, references)
+        flat_scores = [s.test_statistic for s in scores.values() if s is not None]
+        total_score = np.mean(flat_scores)
+        outputs.append((total_score, flat_scores))
+
+    return outputs
 
 
 def _pycoco_eval_cap_metric(
@@ -166,6 +206,98 @@ def _spice(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tu
     return _pycoco_eval_cap_metric(Spice, dataset_paths, split)
 
 
+def _bleurt(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tuple[float, List[float]]]:
+    scores = []
+    for path in dataset_paths:
+        # Load the candidates and references from the dataset
+        with open(path, "r") as f:
+            data = json.load(f)
+            candidates = [
+                sample["candidates"]
+                for i, sample in enumerate(data)
+                if sample.get("split", None) == split or split is None
+            ]
+            references = [
+                sample["references"]
+                for i, sample in enumerate(data)
+                if sample.get("split", None) == split or split is None
+            ]
+
+            scorer = bleurt_score.BleurtScorer()
+            sample_scores = []
+            for c, r in track(list(zip(candidates, references)), transient=True):
+                candidate_scores = []
+                for cn in c:
+                    candidate_scores.append(np.max(scorer.score(candidates=[cn for _ in r], references=r)))
+                sample_scores.append(np.mean(candidate_scores))
+
+            scores.append((np.mean(sample_scores), sample_scores))
+
+    return scores
+
+
+def _bert_score(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tuple[float, List[float]]]:
+    scores = []
+    for path in dataset_paths:
+        # Load the candidates and references from the dataset
+        with open(path, "r") as f:
+            data = json.load(f)
+            candidates = [
+                sample["candidates"]
+                for i, sample in enumerate(data)
+                if sample.get("split", None) == split or split is None
+            ]
+            references = [
+                sample["references"]
+                for i, sample in enumerate(data)
+                if sample.get("split", None) == split or split is None
+            ]
+
+            sample_scores = []
+            scorer = BERTScorer(lang="en", rescale_with_baseline=True)
+            for c, r in track(list(zip(candidates, references)), transient=True):
+                candidate_scores = []
+                for cn in c:
+                    _, _, F = scorer.score([cn], [r])
+                    candidate_scores.append(F.cpu().item())
+                sample_scores.append(np.mean(candidate_scores))
+
+            scores.append((np.mean(sample_scores), sample_scores))
+
+    return scores
+
+
+def _mauve(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tuple[float, List[float]]]:
+    scores = []
+    for path in dataset_paths:
+        # Load the candidates and references from the dataset
+        with open(path, "r") as f:
+            data = json.load(f)
+            candidates = [
+                sample["candidates"]
+                for i, sample in enumerate(data)
+                if sample.get("split", None) == split or split is None
+            ]
+            references = [
+                sample["references"]
+                for i, sample in enumerate(data)
+                if sample.get("split", None) == split or split is None
+            ]
+
+            all_candidates = list(itertools.chain.from_iterable(candidates))
+            all_references = list(itertools.chain.from_iterable(references))
+
+            score = mauve.compute_mauve(
+                p_text=all_candidates,
+                q_text=all_references,
+                device_id=0 if torch.cuda.is_available() else -1,
+                verbose=False,
+            )
+            scores.append((score.mauve, [score.mauve]))
+
+    return scores
+
+
 def _handle_baseline_index(dataset_paths: Sequence[str]) -> Tuple[Optional[int], List[str]]:
     baseline_path = None
     output_paths = []
@@ -187,6 +319,7 @@ def _print_table(
     dataset_paths: List[str],
     baseline_index: Optional[int],
     spice: bool = False,
+    swap_colors: bool = False,
 ):
 
     if spice:
@@ -199,6 +332,9 @@ def _print_table(
     table.add_column(f"{label}")
     table.add_column(f"Max {label}")
     table.add_column(f"Min {label}")
+
+    good_color = "green" if not swap_colors else "red"
+    bad_color = "red" if not swap_colors else "green"
 
     # Direct print
     if baseline_index is None:
@@ -223,67 +359,17 @@ def _print_table(
                 )
             else:
                 # Handle colors for the baseline
-                r1_color = "green" if score[0] > scores[baseline_index][0] else "red"
-                r2_color = "green" if np.max(score[1]) > np.max(scores[baseline_index][1]) else "red"
-                r3_color = "green" if np.min(score[1]) > np.min(scores[baseline_index][1]) else "red"
+                r1_color = good_color if score[0] > scores[baseline_index][0] else bad_color
+                r2_color = good_color if np.max(score[1]) > np.max(scores[baseline_index][1]) else bad_color
+                r3_color = good_color if np.min(score[1]) > np.min(scores[baseline_index][1]) else bad_color
                 table.add_row(
                     os.path.basename(path),
                     # Relative score to the baseline
-                    f"[{r1_color}]{score[0]:0.4f} +/- {np.std(score[1]):0.3f} ({'+' if r1_color == 'green' else '-'}{np.abs(score[0] - scores[baseline_index][0]) / (np.amax([score[0], scores[baseline_index][0]])+1e-12) * 100:0.3f}%)[/{r1_color}]",
-                    f"[{r2_color}]{np.max(score[1]):0.4f} ({'+' if r2_color == 'green' else '-'}{np.abs(np.max(score[1]) - np.max(scores[baseline_index][1])) / (np.amax([np.max(score[1]), np.max(scores[baseline_index][1])])+1e-12)*100:0.3f}%)[/{r2_color}]",
-                    f"[{r3_color}]{np.min(score[1]):0.4f} ({'+' if r3_color == 'green' else '-'}{np.abs(np.min(score[1]) - np.min(scores[baseline_index][1])) / (np.amax([np.min(score[1]), np.min(scores[baseline_index][1])])+1e-12)*100:0.3f}%)[/{r3_color}]",
+                    f"[{r1_color}]{score[0]:0.4f} +/- {np.std(score[1]):0.3f} ({'+' if r1_color == good_color else '-'}{np.abs(score[0] - scores[baseline_index][0]) / (np.amax([score[0], scores[baseline_index][0]])+1e-12) * 100:0.3f}%)[/{r1_color}]",
+                    f"[{r2_color}]{np.max(score[1]):0.4f} ({'+' if r2_color == good_color else '-'}{np.abs(np.max(score[1]) - np.max(scores[baseline_index][1])) / (np.amax([np.max(score[1]), np.max(scores[baseline_index][1])])+1e-12)*100:0.3f}%)[/{r2_color}]",
+                    f"[{r3_color}]{np.min(score[1]):0.4f} ({'+' if r3_color == good_color else '-'}{np.abs(np.min(score[1]) - np.min(scores[baseline_index][1])) / (np.amax([np.min(score[1]), np.min(scores[baseline_index][1])])+1e-12)*100:0.3f}%)[/{r3_color}]",
                 )
     rich.print(table)
-
-
-@click.command()
-@click.argument("dataset_paths", type=str, nargs=-1)
-@click.option("--split", default=None, type=str, help="Split to evaluate")
-def ciderd(dataset_paths, split):
-    baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
-    scores = _ciderd(dataset_paths, split)
-    _print_table("CIDEr-D", scores, dataset_paths, baseline_index)
-
-
-@click.command()
-@click.argument("dataset_paths", type=str, nargs=-1)
-@click.option("--split", default=None, type=str, help="Split to evaluate")
-def meteor(dataset_paths, split):
-    baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
-    scores = _meteor(dataset_paths, split)
-    _print_table("METEOR", scores, dataset_paths, baseline_index)
-
-
-@click.command()
-@click.argument("dataset_paths", type=str, nargs=-1)
-@click.option("--split", default=None, type=str, help="Split to evaluate")
-def rouge(dataset_paths, split):
-    baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
-    scores = _rouge(dataset_paths, split)
-    _print_table("ROUGE", scores, dataset_paths, baseline_index)
-
-
-@click.command()
-@click.argument("dataset_paths", type=str, nargs=-1)
-@click.option("--split", default=None, type=str, help="Split to evaluate")
-def spice(dataset_paths, split):
-    baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
-    scores = _spice(dataset_paths, split)
-    _print_table("SPICE", scores, dataset_paths, baseline_index, spice=True)
-
-
-@click.command()
-@click.argument("dataset_paths", type=str, nargs=-1)
-@click.option("--split", default=None, type=str, help="Split to evaluate")
-def all(dataset_paths, split):
-    baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
-    all_scores = _pycoco_eval_cap_multi_metric([Cider, Meteor, Rouge, Spice], dataset_paths, split)
-    bleu_scores = _bleu(dataset_paths, split)
-    _print_bleu_scores(baseline_index, dataset_paths, bleu_scores)
-    _print_table("CIDEr", all_scores[0], dataset_paths, baseline_index)
-    _print_table("METEOR", all_scores[1], dataset_paths, baseline_index)
-    _print_table("ROUGE", all_scores[2], dataset_paths, baseline_index)
-    _print_table("SPICE", all_scores[3], dataset_paths, baseline_index, spice=True)
 
 
 def _print_bleu_scores(baseline_index, dataset_paths, scores):
@@ -335,6 +421,95 @@ def _print_bleu_scores(baseline_index, dataset_paths, scores):
     rich.print(table)
 
 
+def _simple_function_builder(metric, function_name, string):
+    def _metric_function(dataset_paths, split):
+        baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
+        scores = metric(dataset_paths, split)
+        _print_table(string, scores, dataset_paths, baseline_index, spice=(metric == _spice))
+
+    return _metric_function, click.command(name=function_name)(
+        click.argument("dataset_paths", type=str, nargs=-1)(
+            click.option("--split", default=None, type=str, help="Split to evaluate")(_metric_function)
+        )
+    )
+
+
+def _trm_function_builder(distance_function, function_name, string):
+    def _metric_function(dataset_paths, split, supersample):
+        baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
+        scorer = TriangleRankMetricScorer(
+            distance_function=distance_function, num_uk_samples=500, num_null_samples=0, supersample=supersample
+        )
+        scores = _distribution_metric(scorer, dataset_paths, split)
+        _print_table(string, scores, dataset_paths, baseline_index, swap_colors=True)
+
+    return _metric_function, click.command(name=function_name)(
+        click.argument("dataset_paths", type=str, nargs=-1)(
+            click.option("--split", default=None, type=str, help="Split to evaluate")(
+                click.option(
+                    "--supersample", default=1, type=int, help="Supersample the number of samples to compute the metric"
+                )(
+                    click.option(
+                        "--num_uk_samples",
+                        default=500,
+                        type=int,
+                        help="Number of unknown samples to use for the metric",
+                    )(_metric_function)
+                )
+            )
+        )
+    )
+
+
+def _mmd_function_builder(metric_scorer_class, function_name, string):
+    def _metric_function(dataset_paths, split, supersample, mmd_sigma):
+        baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
+        scorer = metric_scorer_class(
+            mmd_sigma if mmd_sigma is not None else "median", num_null_samples=0, supersample=supersample
+        )
+        scores = _distribution_metric(scorer, dataset_paths, split)
+        _print_table(string, scores, dataset_paths, baseline_index, swap_colors=True)
+
+    return _metric_function, click.command(name=function_name)(
+        click.argument("dataset_paths", type=str, nargs=-1)(
+            click.option("--split", default=None, type=str, help="Split to evaluate")(
+                click.option(
+                    "--supersample", default=1, type=int, help="Supersample the number of samples to compute the metric"
+                )(
+                    click.option(
+                        "--num_uk_samples",
+                        default=500,
+                        type=int,
+                        help="Number of unknown samples to use for the metric",
+                    )(click.option("--mmd-sigma", default=None, type=float, help="MMD sigma")(_metric_function))
+                )
+            )
+        )
+    )
+
+
+ciderd, ciderd_command = _simple_function_builder(_ciderd, "ciderd", "CIDEr-D")
+meteor, meteor_command = _simple_function_builder(_meteor, "meteor", "METEOR")
+rouge, rouge_command = _simple_function_builder(_rouge, "rouge", "ROUGE")
+spice, spice_command = _simple_function_builder(_spice, "spice", "SPICE")
+bleurt, bleurt_command = _simple_function_builder(_bleurt, "bleurt", "BLEURT")
+bert_score, bert_score_command = _simple_function_builder(_bert_score, "bert-score", "BERTScore")
+mauve_score, mauve_score_command = _simple_function_builder(_mauve, "mauve", "Mauve")
+
+
+trm_bleu, trm_bleu_command = _trm_function_builder(BLEU4Distance, "trm-bleu", "TRM-BLEU")
+trm_cider, trm_cider_command = _trm_function_builder(CIDERDDistance, "trm-cider", "TRM-CIDEr")
+trm_meteor, trm_meteor_command = _trm_function_builder(MeteorDistance, "trm-meteor", "TRM-METEOR")
+trm_rouge, trm_rouge_command = _trm_function_builder(ROUGELDistance, "trm-rouge", "TRM-ROUGE")
+trm_bleurt, trm_bleurt_command = _trm_function_builder(BLEURTDistance, "trm-bleurt", "TRM-BLEURT")
+trm_bert_score, trm_bert_score_command = _trm_function_builder(BERTScoreDistance, "trm-bert-score", "TRM-BERTScore")
+trm_bert, trm_bert_command = _trm_function_builder(BERTDistance, "trm-bert", "TRM-BERT")
+
+mmd_bert, mmd_bert_command = _mmd_function_builder(MMDBertMetricScorer, "mmd-bert", "MMD-BERT")
+mmd_clip, mmd_clip_command = _mmd_function_builder(MMDCLIPMetricScorer, "mmd-clip", "MMD-CLIP")
+mmd_fasttext, mmd_fasttext_command = _mmd_function_builder(MMDFastTextMetricScorer, "mmd-fasttext", "MMD-FastText")
+mmd_glove, mmd_glove_command = _mmd_function_builder(MMDGloveMetricScorer, "mmd-glove", "MMD-GloVe")
+
 # BLEU is annoying, since it's special :)
 @click.command()
 @click.argument("dataset_paths", type=str, nargs=-1)
@@ -348,9 +523,59 @@ def bleu(dataset_paths, split):
     _print_bleu_scores(baseline_index, dataset_paths, scores)
 
 
-score.add_command(ciderd)
-score.add_command(meteor)
+@click.command()
+@click.argument("dataset_paths", type=str, nargs=-1)
+@click.option("--split", default=None, type=str, help="Split to evaluate")
+@click.option("--supersample", is_flag=True, default=False, type=bool, help="If candidates should be supersampled")
+@click.option("--mmd-sigma", default=None, type=float, help="MMD sigma")
+def all(dataset_paths, split, supersample, mmd_sigma):
+
+    # Simple Metrics
+    baseline_index, dataset_paths_filtered = _handle_baseline_index(dataset_paths)
+    all_scores = _pycoco_eval_cap_multi_metric([Cider, Meteor, Rouge, Spice], dataset_paths_filtered, split)
+    bleu_scores = _bleu(dataset_paths_filtered, split)
+
+    _print_bleu_scores(baseline_index, dataset_paths_filtered, bleu_scores)
+    _print_table("CIDEr", all_scores[0], dataset_paths_filtered, baseline_index)
+    _print_table("METEOR", all_scores[1], dataset_paths_filtered, baseline_index)
+    _print_table("ROUGE", all_scores[2], dataset_paths_filtered, baseline_index)
+    _print_table("SPICE", all_scores[3], dataset_paths_filtered, baseline_index, spice=True)
+    _print_table("BLEURT", _bleurt(dataset_paths_filtered, split), dataset_paths_filtered, baseline_index)
+    _print_table("BERTScore", _bert_score(dataset_paths_filtered, split), dataset_paths_filtered, baseline_index)
+
+    # MMD scores
+    mmd_glove(dataset_paths, split, supersample, mmd_sigma)
+    mmd_fasttext(dataset_paths, split, supersample, mmd_sigma)
+    mmd_clip(dataset_paths, split, supersample, mmd_sigma)
+    mmd_bert(dataset_paths, split, supersample, mmd_sigma)
+
+    # TRM scores
+    trm_bert(dataset_paths, split, supersample)
+    trm_bert_score(dataset_paths, split, supersample)
+    trm_bleu(dataset_paths, split, supersample)
+    trm_cider(dataset_paths, split, supersample)
+    trm_meteor(dataset_paths, split, supersample)
+    trm_rouge(dataset_paths, split, supersample)
+
+
+# Add all of the commands here...
+score.add_command(ciderd_command)
+score.add_command(meteor_command)
 score.add_command(bleu)
-score.add_command(rouge)
-score.add_command(spice)
+score.add_command(rouge_command)
+score.add_command(spice_command)
+score.add_command(bleurt_command)
+score.add_command(bert_score_command)
+score.add_command(mauve_score_command)
+score.add_command(trm_bleu_command)
+score.add_command(trm_cider_command)
+score.add_command(trm_meteor_command)
+score.add_command(trm_rouge_command)
+score.add_command(trm_bleurt_command)
+score.add_command(trm_bert_command)
+score.add_command(trm_bert_score_command)
+score.add_command(mmd_bert_command)
+score.add_command(mmd_clip_command)
+score.add_command(mmd_fasttext_command)
+score.add_command(mmd_glove_command)
 score.add_command(all)

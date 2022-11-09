@@ -15,7 +15,7 @@ from vdtk.vocab_metrics import vocab_stats
 from vdtk.score import score
 
 FORMAT = "%(message)s"
-logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
+logging.basicConfig(level=logging.WARNING, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
 
 # Deal with NLTK being too verbose
 warnings.filterwarnings("ignore")
