@@ -4,8 +4,9 @@ from typing import Optional
 
 import click
 import numpy as np
-import rich
 from rich.progress import track
+from rich.table import Table
+from rich.console import Console
 
 from vdtk.data_utils import load_dataset
 from vdtk.stats_utils import descr
@@ -14,26 +15,32 @@ from vdtk.stats_utils import descr
 @click.command()
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
-@click.option("--reference-key", default="references", type=str, help="Reference key to evaluate")
-def semantic_variance(dataset_path: str, split: Optional[str] = None, reference_key: str = "references") -> None:
+@click.option("--candidates", default=False, is_flag=True, help="Evaluate candidates instead of references")
+def semantic_variance(dataset_path: str, split: Optional[str] = None, candidates: bool = False) -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path, reference_key=reference_key)
+    data = load_dataset(dataset_path)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]
 
     # Filter data for samples with references
-    data = [s for s in data if s.references]
+    data = [s for s in data if (s.references if not candidates else s.candidates)]
 
     # Compute the semantic variance
     distances = []
     for sample in track(data, description="Computing reference distances", transient=True):
         sample_distances = {}
-        if len(sample.references) > 2:
-            for cp_a, emb_a in zip(sample.references, sample.reference_embeddings):
+        if len((sample.references if not candidates else sample.candidates)) > 2:
+            for cp_a, emb_a in zip(
+                (sample.references if not candidates else sample.candidates),
+                (sample.reference_embeddings if not candidates else sample.candidate_embeddings),
+            ):
                 sample_distances[cp_a] = {}
-                for cp_b, emb_b in zip(sample.references, sample.reference_embeddings):
+                for cp_b, emb_b in zip(
+                    (sample.references if not candidates else sample.candidates),
+                    (sample.reference_embeddings if not candidates else sample.candidate_embeddings),
+                ):
                     if cp_a != cp_b:
                         sample_distances[cp_a][cp_b] = 1 - np.dot(emb_a, emb_b) / (
                             np.linalg.norm(emb_a) * np.linalg.norm(emb_b)
@@ -63,7 +70,7 @@ def semantic_variance(dataset_path: str, split: Optional[str] = None, reference_
     logging.info(f"Aggregated scores for {len(distances)} samples.")
 
     # Print the results
-    table = rich.table.Table(title="Within-Sample Pairwise Embedding Distances", title_justify="left")
+    table = Table(title="Within-Sample Pairwise Embedding Distances", title_justify="left")
     table.add_column("Aggregate")
     table.add_column("Mean")
     table.add_column("Median")
@@ -93,9 +100,9 @@ def semantic_variance(dataset_path: str, split: Optional[str] = None, reference_
             f"{_stats['stddev']:.2f}",
             f"{_stats['25q']:.2f}",
             f"{_stats['75q']:.2f}",
-            f"{_stats['s95ci'][0]:.2f} - {_stats['s95ci'][1]:.2f}",
+            f"{_stats['s95ci'][0]:.2f} - {_stats['s95ci'][1]:.2f}", # type: ignore
         )
 
-    console = rich.console.Console()
+    console = Console()
     console.print()
     console.print(table)

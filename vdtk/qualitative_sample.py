@@ -18,18 +18,18 @@ from vdtk.stats_utils import descr
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
 @click.option("--samples", default=1, type=int, help="The number of samples to get")
-@click.option("--reference-key", default="references", type=str, help="Reference key to evaluate")
+@click.option("--candidates", default=False, is_flag=True, help="Evaluate candidates instead of references")
 def qualitative_sample(
-    dataset_path: str, split: Optional[str] = None, samples: int = 1, reference_key: str = "references"
+    dataset_path: str, split: Optional[str] = None, samples: int = 1, candidates: bool = False
 ) -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path, reference_key=reference_key)
+    data = load_dataset(dataset_path)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]
     # Filter data for samples with references
-    data = [s for s in data if s.references]
+    data = [s for s in data if (s.references if not candidates else s.candidates)]
 
     console = rich.console.Console()
     with console.capture() as capture:
@@ -40,9 +40,15 @@ def qualitative_sample(
 
             # Compute the within-sample BERT embedding distances
             sample_distances = {}
-            for cp_a, emb_a in zip(sample.references, sample.reference_embeddings):
+            for cp_a, emb_a in zip(
+                (sample.references if not candidates else sample.candidates),
+                (sample.reference_embeddings if not candidates else sample.candidate_embeddings),
+            ):
                 sample_distances[cp_a] = {}
-                for cp_b, emb_b in zip(sample.references, sample.reference_embeddings):
+                for cp_b, emb_b in zip(
+                    (sample.references if not candidates else sample.candidates),
+                    (sample.reference_embeddings if not candidates else sample.candidate_embeddings),
+                ):
                     if cp_a != cp_b:
                         sample_distances[cp_a][cp_b] = 1 - np.dot(emb_a, emb_b) / (
                             np.linalg.norm(emb_a) * np.linalg.norm(emb_b)
@@ -57,9 +63,14 @@ def qualitative_sample(
             sample_distances_descr = descr(dff)
 
             # Compute the mean embedding, and distance to the mean
-            mean_embedding = np.mean(sample.reference_embeddings, axis=0)
+            mean_embedding = np.mean(
+                (sample.reference_embeddings if not candidates else sample.candidate_embeddings), axis=0
+            )
             mean_distances = {}
-            for cp_a, emb_a in zip(sample.references, sample.reference_embeddings):
+            for cp_a, emb_a in zip(
+                (sample.references if not candidates else sample.candidates),
+                (sample.reference_embeddings if not candidates else sample.candidate_embeddings),
+            ):
                 mean_distances[cp_a] = 1 - np.dot(emb_a, mean_embedding) / (
                     np.linalg.norm(emb_a) * np.linalg.norm(mean_embedding)
                 )
@@ -67,9 +78,15 @@ def qualitative_sample(
             # Compute the inter-sample leave-one-out BLEU scores
             scorer = Bleu(4)
             bleu_scores = defaultdict(dict)
-            for c, cp_a in zip(sample.references, sample.references_tokenized_text):
+            for c, cp_a in zip(
+                (sample.references if not candidates else sample.candidates),
+                (sample.references_tokenized_text if not candidates else sample.candidates_tokenized_text),
+            ):
                 hypothesis = {0: [" ".join(cp_a)]}
-                for cb, cp_b in zip(sample.references, sample.references_tokenized_text):
+                for cb, cp_b in zip(
+                    (sample.references if not candidates else sample.candidates),
+                    (sample.references_tokenized_text if not candidates else sample.candidates_tokenized_text),
+                ):
                     if tuple(cp_a) != tuple(cp_b):
                         bleu_scores[c][cb] = scorer.compute_score({0: [" ".join(cp_b)]}, hypothesis)[0][-1]
 
@@ -83,7 +100,7 @@ def qualitative_sample(
 
             console.print()
             console.rule(f"[bold]Sample: {sample._id}")
-            for idx, elem in enumerate(sorted(mean_distances, key=mean_distances.get)):
+            for idx, elem in enumerate(sorted(mean_distances, key=mean_distances.get)):  # type: ignore
                 fmt_string = f"- {elem} (Dist: {mean_distances[elem]:.2f}) (BLEU@4: {np.amax(list(bleu_scores[elem].values())):.4f})"
                 if idx == 0 and elem == best_bleu_mean_caption[0]:
                     console.print(fmt_string, style="green")

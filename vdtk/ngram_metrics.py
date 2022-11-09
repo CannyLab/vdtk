@@ -6,6 +6,7 @@ import click
 import numpy as np
 import rich
 from rich.progress import track
+from rich.table import Table
 
 from vdtk.data_utils import load_dataset
 from vdtk.lm import NGramLM
@@ -31,22 +32,23 @@ def _compute_ed(ls, evs_2, evs_3, evs_4):
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
 @click.option("--reference-key", default="references", type=str, help="Reference key to evaluate")
-def ngram_stats(dataset_path: str, split: Optional[str] = None, reference_key: str = "references") -> None:
+@click.option("--candidates", default=False, is_flag=True, help="Evaluate candidates instead of references")
+def ngram_stats(dataset_path: str, split: Optional[str] = None, candidates: bool = False) -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path, reference_key=reference_key)
+    data = load_dataset(dataset_path)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]
     # Filter data for samples with references
-    data = [s for s in data if s.references]
+    data = [s for s in data if (s.references if not candidates else s.candidates)]
 
     # Build the n-gram language models
     logging.info("Tokenizing samples...")
     tokenized_data = list(
         itertools.chain.from_iterable(
             [
-                sample.references_tokenized_text
+                (sample.references_tokenized_text if not candidates else sample.candidates_tokenized_text)
                 for sample in track(data, transient=True, description="Tokenizing Samples")
             ]
         )
@@ -66,7 +68,7 @@ def ngram_stats(dataset_path: str, split: Optional[str] = None, reference_key: s
     evs_3 = _compute_evs(three_lm)
     evs_4 = _compute_evs(four_lm)
 
-    ll_table = rich.table.Table(title="N-Gram Model Quality", title_justify="left")
+    ll_table = Table(title="N-Gram Model Quality", title_justify="left")
     ll_table.add_column("N")
     ll_table.add_column("Log Likelihood")
     ll_table.add_column("Perplexity")
@@ -75,7 +77,7 @@ def ngram_stats(dataset_path: str, split: Optional[str] = None, reference_key: s
     ll_table.add_row("4", str(four_ll), str(np.exp(-four_ll)))
 
     evs_title = "EVS@N (Essential Vocab Size @ N)"
-    evs_table = rich.table.Table(title=evs_title, title_justify="left", min_width=min(80, len(evs_title)))
+    evs_table = Table(title=evs_title, title_justify="left", min_width=min(80, len(evs_title)))
     evs_table.add_column("N")
     evs_table.add_column("EVS@N")
 
@@ -84,7 +86,7 @@ def ngram_stats(dataset_path: str, split: Optional[str] = None, reference_key: s
     evs_table.add_row("4", f"{evs_4 * 100:.2f}%")
 
     ed_title = "ED@N (Expected Number of Decisions @ N)"
-    ed_table = rich.table.Table(title=ed_title, title_justify="left", min_width=min(80, len(ed_title)))
+    ed_table = Table(title=ed_title, title_justify="left", min_width=min(80, len(ed_title)))
     ed_table.add_column("N")
     ed_table.add_column("ED@N")
     for i in range(5, 25, 5):

@@ -1,13 +1,14 @@
 import logging
 from collections import Counter
-from typing import Optional
+from typing import Optional, List
 
 import click
 import numpy as np
-import rich
+from rich.table import Table
 from rich.progress import track
+from rich.console import Console
 
-from vdtk.data_utils import load_dataset
+from vdtk.data_utils import load_dataset, Sample
 
 
 def _compute_head_tokens(vocab_counts, ratio: float = 0.9):
@@ -38,7 +39,7 @@ def _compute_vocab_stats(vocab_counts, sample_vocabs):
     bs_uniqueness = _compute_bs_uniqueness(vocab_counts, sample_vocabs)
 
     # Print the output table
-    vocab_stats_table = rich.table.Table(title="Vocab Base Statistics", title_justify="left")
+    vocab_stats_table = Table(title="Vocab Base Statistics", title_justify="left")
     vocab_stats_table.add_column("Unique Tokens")
     vocab_stats_table.add_column("Total Tokens")
     vocab_stats_table.add_column("90% Head")
@@ -56,7 +57,7 @@ def _compute_vocab_stats(vocab_counts, sample_vocabs):
 
 
 def _compute_pos_stats(noun_counts, verb_counts, sample_noun_counts, sample_verb_counts):
-    pos_stats_table = rich.table.Table(title="POS Base Statistics", title_justify="left")
+    pos_stats_table = Table(title="POS Base Statistics", title_justify="left")
 
     unique_nouns = len(noun_counts)
     unique_verbs = len(verb_counts)
@@ -95,7 +96,7 @@ def _compute_pos_stats(noun_counts, verb_counts, sample_noun_counts, sample_verb
     return pos_stats_table
 
 
-def _count_nouns_and_verbs(data):
+def _count_nouns_and_verbs(data, candidates):
     noun_counts = Counter()
     verb_counts = Counter()
     sample_noun_counts = []
@@ -103,7 +104,7 @@ def _count_nouns_and_verbs(data):
     for sample in track(data, transient=True, description="Counting Nouns and Verbs"):
         sample_noun_counts.append(Counter())
         sample_verb_counts.append(Counter())
-        for reference in sample.references_tokenized_pos:
+        for reference in sample.references_tokenized_pos if not candidates else sample.candidates_tokenized_pos:
             for token, pos in reference:
                 if pos in ("NOUN", "PROPN"):
                     noun_counts[token] += 1
@@ -114,12 +115,12 @@ def _count_nouns_and_verbs(data):
     return noun_counts, verb_counts, sample_noun_counts, sample_verb_counts
 
 
-def _count_tokens(data):
+def _count_tokens(data: List[Sample], candidates):
     vocab_counts = Counter()
     sample_vocabs = []
     for sample in track(data, transient=True, description="Counting Tokens"):
         sample_vocab = Counter()
-        for reference in sample.references_tokenized_text:
+        for reference in sample.references_tokenized_text if not candidates else sample.candidates_tokenized_text:
             vocab_counts.update(reference)
             sample_vocab.update(reference)
         sample_vocabs.append(sample_vocab)
@@ -129,28 +130,28 @@ def _count_tokens(data):
 @click.command()
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
-@click.option("--reference-key", default="references", type=str, help="Reference key to evaluate")
-def vocab_stats(dataset_path: str, split: Optional[str] = None, reference_key: str = "references") -> None:
+@click.option("--candidates", default=False, is_flag=True, help="Evaluate candidates instead of references")
+def vocab_stats(dataset_path: str, split: Optional[str] = None, candidates: bool = False) -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path, reference_key=reference_key)
+    data = load_dataset(dataset_path)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]
 
     # Compute the vocab
     logging.info("Tokenizing dataset and counting vocab...")
-    vocab_counts, sample_vocabs = _count_tokens(data)
+    vocab_counts, sample_vocabs = _count_tokens(data, candidates)
 
     # Compute counters for POS tags
     logging.info("Counting POS tags...")
-    noun_counts, verb_counts, sample_noun_counts, sample_verb_counts = _count_nouns_and_verbs(data)
+    noun_counts, verb_counts, sample_noun_counts, sample_verb_counts = _count_nouns_and_verbs(data, candidates)
 
     logging.info("Computing statistics...")
     vocab_stats_table = _compute_vocab_stats(vocab_counts, sample_vocabs)
     pos_stats_table = _compute_pos_stats(noun_counts, verb_counts, sample_noun_counts, sample_verb_counts)
 
-    console = rich.console.Console()
+    console = Console()
     console.print()
     console.print(vocab_stats_table)
     console.print(pos_stats_table)

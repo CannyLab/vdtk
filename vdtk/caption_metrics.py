@@ -6,6 +6,7 @@ import click
 import numpy as np
 import rich
 from rich.progress import track
+from rich.table import Table
 
 from vdtk.data_utils import load_dataset
 from vdtk.stats_utils import descr
@@ -14,11 +15,11 @@ from vdtk.stats_utils import descr
 @click.command()
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
-@click.option("--reference-key", default="references", type=str, help="Reference key to evaluate")
-def caption_stats(dataset_path: str, split: Optional[str] = None, reference_key: str = "references") -> None:
+@click.option("--candidates", default=False, is_flag=True, help="Evaluate candidates instead of references")
+def caption_stats(dataset_path: str, split: Optional[str] = None, candidates: bool = False) -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path, reference_key=reference_key)
+    data = load_dataset(dataset_path)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]
@@ -29,7 +30,10 @@ def caption_stats(dataset_path: str, split: Optional[str] = None, reference_key:
             list(
                 itertools.chain.from_iterable(
                     [
-                        [len(c) for c in s.references_tokenized_lemma]
+                        [
+                            len(c)
+                            for c in (s.references_tokenized_lemma if not candidates else s.candidates_tokenized_lemma)
+                        ]
                         for s in track(data, description="Tokenizing dataset...", transient=True)
                     ]
                 )
@@ -37,14 +41,14 @@ def caption_stats(dataset_path: str, split: Optional[str] = None, reference_key:
         )
     )
     unique_captions = [
-        set(tuple(c) for c in s.references_tokenized_lemma)
+        set(tuple(c) for c in (s.references_tokenized_lemma if not candidates else s.candidates_tokenized_lemma))
         for s in track(data, description="Tokenizing dataset...", transient=True)
     ]
     captions_per_video = descr([len(s.references) for s in data if s.references])
     unique_captions_per_video = descr([len(u) for u in unique_captions if len(u) > 0])
 
     # Display the table
-    table = rich.table.Table(title="Caption Metrics", title_justify="left")
+    table = Table(title="Caption Metrics", title_justify="left")
     table.add_column("Metric")
     table.add_column("Mean")
     table.add_column("Median")

@@ -33,11 +33,15 @@ class Sample:
     _id: Optional[str] = None
     split: Optional[str] = None
     references: List[str] = field(default_factory=list)
+    candidates: List[str] = field(default_factory=list)
+    media_path: Optional[str] = None
     metadata: Optional[Any] = field(default=None)
 
     # Things that are created on the fly
     _tokenized_references: Optional[Any] = None
     _reference_embeddings: Optional[Any] = None
+    _tokenized_candidates: Optional[Any] = None
+    _candidate_embeddings: Optional[Any] = None
 
     @property
     def references_tokenized(self) -> Any:
@@ -65,8 +69,32 @@ class Sample:
             )
         return self._reference_embeddings
 
+    @property
+    def candidates_tokenized(self) -> Any:
+        return list(_Evaluators._spacy_nlp().pipe(self.candidates))
 
-def load_dataset(dataset_json_path: str, reference_key: str = "references") -> List[Sample]:
+    @property
+    def candidates_tokenized_text(self) -> List[List[str]]:
+        return [[r.text.lower() for r in ref] for ref in self.candidates_tokenized]
+
+    @property
+    def candidates_tokenized_lemma(self) -> List[List[str]]:
+        return [[r.lemma_.lower() for r in ref] for ref in self.candidates_tokenized]
+
+    @property
+    def candidates_tokenized_pos(self) -> List[List[Tuple[Any, Any]]]:
+        return [[(r.lemma_, r.pos_) for r in ref] for ref in self.candidates_tokenized]
+
+    @property
+    def candidate_embeddings(self) -> List[np.ndarray]:
+        if self._candidate_embeddings is None:
+            self._candidate_embeddings = _Evaluators._sentence_transformer().encode(
+                self.references, show_progress_bar=False
+            )
+        return self._candidate_embeddings
+
+
+def load_dataset(dataset_json_path: str) -> List[Sample]:
     """
     Loads the dataset from the json file.
     """
@@ -76,7 +104,9 @@ def load_dataset(dataset_json_path: str, reference_key: str = "references") -> L
         Sample(
             _id=sample.get("_id", None),
             split=sample.get("split", None),
-            references=sample.get(reference_key, []),
+            references=sample.get("references", []),
+            candidates=sample.get("candidates", []),
+            media_path=sample.get("media_path", None),
             metadata=sample.get("metadata", None),
         )
         for sample in dataset

@@ -1,7 +1,7 @@
 import logging
 import os
 from collections import defaultdict
-from typing import Optional
+from typing import Optional, List
 
 import click
 import numpy as np
@@ -9,9 +9,10 @@ import rich
 from fuzzysearch import find_near_matches
 from fuzzywuzzy import process
 from mpire import WorkerPool
-from rich.progress import track
+from rich.progress import track, Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn, TimeRemainingColumn
+from rich.table import Table
 
-from vdtk.data_utils import load_dataset
+from vdtk.data_utils import load_dataset, Sample
 from vdtk.metrics.bleu.bleu import Bleu
 from vdtk.metrics.meteor.meteor import Meteor
 from vdtk.metrics.rouge.rouge import Rouge
@@ -48,14 +49,16 @@ def _match_concept(concept, reference, fuzzy=False, fuzzy_threshold=90):
     return concept in reference
 
 
-def _compute_overlap(data, concept_set, fuzzy: bool = False, fuzzy_threshold: int = 90):
+def _compute_overlap(
+    data: List[Sample], concept_set: str, fuzzy: bool = False, fuzzy_threshold: int = 90, candidates: bool = False
+):
     logging.info(f"Computing overlap with {concept_set}")
     concepts = _load_concepts(CONCEPT_SETS[concept_set])
     matched_captions = defaultdict(set)
     matches = []
     for sample in track(data, transient=True, description=f"Computing {concept_set} overlap"):
         sample_matched = False
-        for reference in sample.references:
+        for reference in sample.references if not candidates else sample.candidates:
             for concept in concepts:
                 if _match_concept(concept, reference, fuzzy, fuzzy_threshold):
                     sample_matched = True
@@ -65,7 +68,7 @@ def _compute_overlap(data, concept_set, fuzzy: bool = False, fuzzy_threshold: in
     return matches, matched_captions
 
 
-def _leave_one_out(data, concept_overlap, concept_set, fuzzy, fuzzy_threshold):
+def _leave_one_out(data, concept_overlap, concept_set, fuzzy, fuzzy_threshold, candidates):
     _, matched_concepts = concept_overlap
     logging.info(f"Computing leave-one-out for {concept_set}")
 
@@ -77,13 +80,14 @@ def _leave_one_out(data, concept_overlap, concept_set, fuzzy, fuzzy_threshold):
             # "METEOR": Meteor(),
         }  # Note: CIDEr doesn't really make sense here...
         worker_state["matched_concepts"] = matched_concepts
+        worker_state["candidates"] = candidates
 
     def __loo_worker(worker_state, sample):
         # Build the hypothesis set
         hypotheses = set()
-        references = set(sample.references)
+        references = set((sample.references if not worker_state["candidates"] else sample.candidates))
         for concept in worker_state["matched_concepts"].keys():
-            for reference in sample.references:
+            for reference in sample.references if not worker_state["candidates"] else sample.candidates:
                 if _match_concept(concept, reference, fuzzy, fuzzy_threshold):
                     hypotheses |= set([h for h in worker_state["matched_concepts"][concept] if h not in references])
         # Compute the scores
@@ -102,16 +106,16 @@ def _leave_one_out(data, concept_overlap, concept_set, fuzzy, fuzzy_threshold):
 
         # Setup the progress bar
         progress_columns = [
-            rich.progress.SpinnerColumn(),
-            rich.progress.TextColumn("[progress.description]{task.description}"),
-            rich.progress.BarColumn(),
-            rich.progress.TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            rich.progress.TimeElapsedColumn(),
-            rich.progress.TimeRemainingColumn(),
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TimeElapsedColumn(),
+            TimeRemainingColumn(),
         ]
 
         logging.info(f"Computing Leave-One-Out Concept Scores for {len(data)} samples.")
-        with rich.progress.Progress(*progress_columns, transient=True) as progress:
+        with Progress(*progress_columns, transient=True) as progress:
             for result in progress.track(
                 pool.imap(__loo_worker, data, worker_init=__loo_worker_init_fn),
                 description="Evaluating...",
@@ -127,29 +131,31 @@ def _leave_one_out(data, concept_overlap, concept_set, fuzzy, fuzzy_threshold):
 @click.option("--split", default=None, type=str, help="Split to evaluate")
 @click.option("--fuzzy", default=False, type=bool, help="Use fuzzy matching")
 @click.option("--fuzzy-threshold", default=90, type=click.IntRange(0, 100), help="Fuzzy matching threshold")
-@click.option("--reference-key", default="references", type=str, help="Key to use for references")
+@click.option("--candidates", default=False, is_flag=True, help="Evaluate candidates instead of references")
 def concept_overlap(
     dataset_path: str,
     split: Optional[str] = None,
     fuzzy: bool = False,
     fuzzy_threshold: int = 90,
-    reference_key: str = "references",
+    candidates: bool = False,
 ) -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path, reference_key=reference_key)
+    data = load_dataset(dataset_path)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]
-    # Filter data for samples with references
-    data = [s for s in data if s.references]
 
-    overlaps = {k: _compute_overlap(data, k, fuzzy=fuzzy, fuzzy_threshold=fuzzy_threshold) for k in CONCEPT_SETS.keys()}
+    # Filter data for samples with references
+    data = [s for s in data if (s.references if not candidates else s.candidates)]
+
+    overlaps = {
+        k: _compute_overlap(data, k, fuzzy=fuzzy, fuzzy_threshold=fuzzy_threshold, candidates=candidates)
+        for k in CONCEPT_SETS.keys()
+    }
 
     # Build the table
-    concept_table = rich.table.Table(
-        title=f"Concept Set Matches ({'Exact' if not fuzzy else 'Fuzzy'})", title_justify="left"
-    )
+    concept_table = Table(title=f"Concept Set Matches ({'Exact' if not fuzzy else 'Fuzzy'})", title_justify="left")
     concept_table.add_column("Concept Set", justify="left")
     concept_table.add_column("# Samples", justify="right")
     concept_table.add_column("# Matches", justify="right")
@@ -179,8 +185,13 @@ def concept_overlap(
 @click.option("--split", default=None, type=str, help="Split to evaluate")
 @click.option("--fuzzy", default=False, type=bool, help="Use fuzzy matching")
 @click.option("--fuzzy-threshold", default=90, type=click.IntRange(0, 100), help="Fuzzy matching threshold")
+@click.option("--candidates", default=False, is_flag=True, help="Evaluate candidates instead of references")
 def concept_leave_one_out(
-    dataset_path: str, split: Optional[str] = None, fuzzy: bool = False, fuzzy_threshold: int = 90
+    dataset_path: str,
+    split: Optional[str] = None,
+    fuzzy: bool = False,
+    fuzzy_threshold: int = 90,
+    candidates: bool = False,
 ) -> None:
 
     logging.info("Loading dataset...")
@@ -189,13 +200,18 @@ def concept_leave_one_out(
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]
     # Filter data for samples with references
-    data = [s for s in data if s.references]
+    data = [s for s in data if (s.references if not candidates else s.candidates)]
 
-    overlaps = {k: _compute_overlap(data, k, fuzzy=fuzzy, fuzzy_threshold=fuzzy_threshold) for k in CONCEPT_SETS.keys()}
-    leave_one_out = {k: _leave_one_out(data, overlaps[k], k, fuzzy, fuzzy_threshold) for k in CONCEPT_SETS.keys()}
+    overlaps = {
+        k: _compute_overlap(data, k, fuzzy=fuzzy, fuzzy_threshold=fuzzy_threshold, candidates=candidates)
+        for k in CONCEPT_SETS.keys()
+    }
+    leave_one_out = {
+        k: _leave_one_out(data, overlaps[k], k, fuzzy, fuzzy_threshold, candidates) for k in CONCEPT_SETS.keys()
+    }
 
     # Build the table
-    concept_table = rich.table.Table(
+    concept_table = Table(
         title=f"Concept Set Leave-One-Out ({'Exact' if not fuzzy else 'Fuzzy'})", title_justify="left"
     )
     concept_table.add_column("Concept Set", justify="left")

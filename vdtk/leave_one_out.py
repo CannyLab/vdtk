@@ -4,9 +4,10 @@ from typing import Optional
 
 import click
 import numpy as np
-import rich
 from mpire import WorkerPool
-from rich.progress import track
+from rich.progress import track, Progress, BarColumn, TimeRemainingColumn, TextColumn, TimeElapsedColumn, SpinnerColumn
+from rich.table import Table
+from rich.console import Console
 
 from vdtk.data_utils import load_dataset
 from vdtk.metrics.bleu.bleu import Bleu
@@ -42,17 +43,15 @@ def _loo_worker_fn(worker_state, hypotheses, ground_truths):
 @click.option("--split", default=None, type=str, help="Split to evaluate")
 @click.option("--iterations", default=750, type=click.IntRange(min=1), help="Number of iterations to run")
 @click.option("--max-gt-size", default=None, type=int, help="Maximum number of ground truth sentences to use")
-@click.option("--reference-key", default="references", type=str, help="Reference key to evaluate")
 def leave_one_out(
     dataset_path: str,
     split: Optional[str] = None,
     iterations: int = 750,
     max_gt_size: Optional[int] = None,
-    reference_key: str = "references",
 ) -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path, reference_key=reference_key)
+    data = load_dataset(dataset_path)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]
@@ -82,15 +81,15 @@ def leave_one_out(
 
         # Setup the progress bar
         progress_columns = [
-            rich.progress.SpinnerColumn(),
-            rich.progress.TextColumn("[progress.description]{task.description}"),
-            rich.progress.BarColumn(),
-            rich.progress.TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            rich.progress.TimeElapsedColumn(),
-            rich.progress.TimeRemainingColumn(),
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TimeElapsedColumn(),
+            TimeRemainingColumn(),
         ]
 
-        with rich.progress.Progress(*progress_columns, transient=True) as progress:
+        with Progress(*progress_columns, transient=True) as progress:
             for result in progress.track(
                 pool.imap_unordered(_loo_worker_fn, experiments, worker_init=_loo_worker_init_fn),
                 description="Evaluating...",
@@ -109,9 +108,7 @@ def leave_one_out(
         "METEOR": descr([r["METEOR"][0] for r in experimental_results]),
     }
 
-    metrics_table = rich.table.Table(
-        title=f"Leave One Out Metric Scores ({iterations} Iterations)", title_justify="left"
-    )
+    metrics_table = Table(title=f"Leave One Out Metric Scores ({iterations} Iterations)", title_justify="left")
     metrics_table.add_column("Metric", justify="left")
     metrics_table.add_column("Mean")
     metrics_table.add_column("Median")
@@ -133,11 +130,11 @@ def leave_one_out(
                 f"{value['stddev']:.2f}",
                 f"{value['25q']:.2f}",
                 f"{value['75q']:.2f}",
-                f"{value['s95ci'][0]:.2f} - {value['s95ci'][1]:.2f}",
+                f"{value['s95ci'][0]:.2f} - {value['s95ci'][1]:.2f}",  # type: ignore
             ],
         )
 
     # Print the results
-    console = rich.console.Console()
+    console = Console()
     console.print()
     console.print(metrics_table)
