@@ -8,10 +8,11 @@ import numpy as np
 import ast
 import tempfile
 
-from .get_stanford_models import get_stanford_models
+from jdk4py import JAVA
+from vdtk.metrics.corenlp import CORENLP_JAVA_LIBDIR
 
 # Assumes spice.jar is in the same directory as spice.py.  Change as needed.
-SPICE_JAR = "spice-1.0.jar"
+SPICE_JAR = os.path.join(CORENLP_JAVA_LIBDIR, "lib", "*")
 TEMP_DIR = "tmp"
 CACHE_DIR = "cache"
 
@@ -20,9 +21,6 @@ class Spice:
     """
     Main Class to compute the SPICE metric
     """
-
-    def __init__(self):
-        get_stanford_models()
 
     def float_convert(self, obj):
         try:
@@ -63,10 +61,23 @@ class Spice:
         if not os.path.exists(cache_dir):
             os.makedirs(cache_dir)
         spice_cmd = [
-            "java",
-            "-jar",
+            str(JAVA),
+            "--add-opens",
+            "java.base/java.lang=ALL-UNNAMED",
+            "--add-opens",
+            "java.base/java.math=ALL-UNNAMED",
+            "--add-opens",
+            "java.base/java.util=ALL-UNNAMED",
+            "--add-opens",
+            "java.base/java.util.concurrent=ALL-UNNAMED",
+            "--add-opens",
+            "java.base/java.net=ALL-UNNAMED",
+            "--add-opens",
+            "java.base/java.text=ALL-UNNAMED",
             "-Xmx8G",
+            "-cp",
             SPICE_JAR,
+            "edu.anu.spice.SpiceScorer",
             in_file.name,
             "-cache",
             cache_dir,

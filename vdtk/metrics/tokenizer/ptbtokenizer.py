@@ -14,8 +14,12 @@ import subprocess
 import tempfile
 import itertools
 
+from jdk4py import JAVA
+from vdtk.metrics.corenlp import CORENLP_JAVA_LIBDIR
+
 # path to the stanford corenlp jar
-STANFORD_CORENLP_3_4_1_JAR = "stanford-corenlp-3.4.1.jar"
+JAR_FILES = os.path.join(CORENLP_JAVA_LIBDIR, "lib", "*")
+# JAR_FILE = "stanford-corenlp-3.4.1.jar"
 
 # punctuations to be removed from the sentences
 PUNCTUATIONS = [
@@ -44,9 +48,9 @@ class PTBTokenizer:
 
     def tokenize(self, captions_for_image):
         cmd = [
-            "java",
+            str(JAVA),
             "-cp",
-            STANFORD_CORENLP_3_4_1_JAR,
+            JAR_FILES,
             "edu.stanford.nlp.process.PTBTokenizer",
             "-preserveLines",
             "-lowerCase",
@@ -63,7 +67,7 @@ class PTBTokenizer:
         # ======================================================
         # save sentences to temporary file
         # ======================================================
-        path_to_jar_dirname = os.path.dirname(os.path.abspath(__file__))
+        path_to_jar_dirname = os.path.dirname(os.path.abspath(JAR_FILES))
         tmp_file = tempfile.NamedTemporaryFile(mode="w", delete=False)
         tmp_file.write(sentences)
         tmp_file.close()
@@ -91,9 +95,9 @@ class PTBTokenizer:
 
     def tokenize_flat(self, captions):
         cmd = [
-            "java",
+            str(JAVA),
             "-cp",
-            STANFORD_CORENLP_3_4_1_JAR,
+            JAR_FILES,
             "edu.stanford.nlp.process.PTBTokenizer",
             "-preserveLines",
             "-lowerCase",
@@ -110,9 +114,7 @@ class PTBTokenizer:
 
         # Tokenize
         cmd.append(tmp_file.name)
-        p_tokenizer = subprocess.Popen(
-            cmd, cwd=path_to_jar_dirname, stdout=subprocess.PIPE, stderr=open(os.devnull, "w")
-        )
+        p_tokenizer = subprocess.Popen(cmd, cwd=path_to_jar_dirname, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         token_lines = p_tokenizer.communicate(input=sentences)[0]
         lines = token_lines.decode("utf-8").split("\n")
         # remove temp file

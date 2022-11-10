@@ -1,11 +1,10 @@
-from pycocotools.coco import COCO
-from pycocoevalcap.eval import COCOEvalCap
-import os
-from vdtk.score import _ciderd, _bleu
-import numpy as np
-
-
 def test_coco_score_consistency():
+    from pycocotools.coco import COCO
+    from pycocoevalcap.eval import COCOEvalCap
+    import os
+    from vdtk.score import _ciderd, _bleu
+    import numpy as np
+
     # Get the pycocoevalcap scores
 
     annotation_file = os.path.join(os.path.dirname(__file__), "test_assets", "captions_val2014.json")

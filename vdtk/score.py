@@ -12,9 +12,9 @@ import torch
 
 # from vdtk.metrics.bleu.bleu import Bleu
 from vdtk.metrics.bleu.bleu import Bleu
-from pycocoevalcap.cider.cider import Cider
-from pycocoevalcap.rouge.rouge import Rouge
-from pycocoevalcap.meteor.meteor import Meteor
+from vdtk.metrics.cider.cider import CiderBase as Cider
+from vdtk.metrics.rouge.rouge import RougeBase as Rouge
+from vdtk.metrics.meteor.meteor import MeteorBase as Meteor
 from vdtk.metrics.spice.spice import Spice
 from vdtk.metrics.tokenizer.ptbtokenizer import PTBTokenizer
 
@@ -542,6 +542,7 @@ def all(dataset_paths, split, supersample, mmd_sigma):
     _print_table("SPICE", all_scores[3], dataset_paths_filtered, baseline_index, spice=True)
     _print_table("BLEURT", _bleurt(dataset_paths_filtered, split), dataset_paths_filtered, baseline_index)
     _print_table("BERTScore", _bert_score(dataset_paths_filtered, split), dataset_paths_filtered, baseline_index)
+    _print_table("Mauve", _mauve(dataset_paths_filtered, split), dataset_paths_filtered, baseline_index)
 
     # MMD scores
     mmd_glove(dataset_paths, split, supersample, mmd_sigma)

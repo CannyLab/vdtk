@@ -5,9 +5,7 @@ understand their data at a token, n-gram, description, and dataset level.
 
 ## Installation
 
-To use this tool, you can easily pip install with `pip install vdtk`. Note: Some metrics (METEOR) require a working installation of Java.
-Please follow the directions [here](https://www.java.com/en/download/manual.jsp) to install the Java runtime if you do not
-already have access to a JRE.
+To use this tool, you can easily pip install with `pip install vdtk`.
 
 ## Data format
 
