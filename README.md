@@ -55,8 +55,8 @@ of the JSON file paths will treat this run as a baseline, and compute relative v
 | Command | Details |
 | ----------- | ----------- |
 | score | Run with `vdtk-cli score [metric] DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute BLEU/METEOR/CIDEr-D/ROUGE/BERTScore/MAUVE/etc. Guaranteed to be consistent with the COCO captioning tools (for use externally). |
-| **[ALPHA]** clip-recall | Run with `vdtk-cli clip-recall DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute the MRR, and Recall@K values for candidate/reference captions based on the CLIP model. |
-| **[ALPHA]** content-recall | Run with `vdtk-cli content-recall DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute Noun/Verb recall for the candidates against the references. |
+| clip-recall | Run with `vdtk-cli clip-recall DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute the MRR, and Recall@K values for candidate/reference captions based on the CLIP model. |
+| content-recall | Run with `vdtk-cli content-recall DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute Noun/Verb recall for the candidates against the references. |
 
 For more details and options, see the `--help` command for any of the commands above. Note that some tools are relatively
 compute intensive. This toolkit will make use of a GPU if available and necessary, as well as a large number of CPU cores
