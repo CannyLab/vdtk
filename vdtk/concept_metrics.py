@@ -14,7 +14,6 @@ from rich.table import Table
 
 from vdtk.data_utils import load_dataset, Sample
 from vdtk.metrics.bleu.bleu import Bleu
-from vdtk.metrics.meteor.meteor import Meteor
 from vdtk.metrics.rouge.rouge import Rouge
 
 CONCEPT_SETS = {

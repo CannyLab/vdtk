@@ -14,6 +14,7 @@ from vdtk.semantic_variance import semantic_variance
 from vdtk.vocab_metrics import vocab_stats
 from vdtk.score import score
 from vdtk.content_recall import content_recall
+from vdtk.clip_recall import clip_recall
 
 FORMAT = "%(message)s"
 logging.basicConfig(level=logging.WARNING, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
@@ -39,6 +40,8 @@ cli.add_command(caption_stats)
 cli.add_command(qualitative_sample)
 cli.add_command(score)
 cli.add_command(content_recall)
+cli.add_command(clip_recall)
+
 
 if __name__ == "__main__":
     cli()

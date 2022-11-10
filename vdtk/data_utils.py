@@ -4,6 +4,7 @@ from typing import Any, List, Optional, Tuple
 
 import numpy as np
 import spacy
+import os
 from sentence_transformers import SentenceTransformer
 
 
@@ -94,19 +95,22 @@ class Sample:
         return self._candidate_embeddings
 
 
-def load_dataset(dataset_json_path: str) -> List[Sample]:
+def load_dataset(dataset_json_path: str, media_root: Optional[str] = None) -> List[Sample]:
     """
     Loads the dataset from the json file.
     """
     with open(dataset_json_path) as f:
         dataset = json.load(f)
+
     return [
         Sample(
             _id=sample.get("_id", None),
             split=sample.get("split", None),
             references=sample.get("references", []),
             candidates=sample.get("candidates", []),
-            media_path=sample.get("media_path", None),
+            media_path=os.path.join(media_root, sample.get("media_path", None))
+            if media_root is not None and sample.get("media_path", None) is not None
+            else sample.get("media_path", sample.get("image_path", None)),
             metadata=sample.get("metadata", None),
         )
         for sample in dataset
