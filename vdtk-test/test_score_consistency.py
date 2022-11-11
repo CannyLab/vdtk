@@ -1,9 +1,11 @@
 def test_coco_score_consistency():
-    from pycocotools.coco import COCO
-    from pycocoevalcap.eval import COCOEvalCap
     import os
-    from vdtk.score import _ciderd, _bleu
+
     import numpy as np
+    from pycocoevalcap.eval import COCOEvalCap
+    from pycocotools.coco import COCO
+
+    from vdtk.score import _bleu, _ciderd
 
     # Get the pycocoevalcap scores
 

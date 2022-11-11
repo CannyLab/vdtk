@@ -1,14 +1,16 @@
 from __future__ import division
-import os
-import sys
-import subprocess
-import threading
-import json
-import numpy as np
-import ast
-import tempfile
 
+import ast
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import threading
+
+import numpy as np
 from jdk4py import JAVA
+
 from vdtk.metrics.corenlp import CORENLP_JAVA_LIBDIR
 
 # Assumes spice.jar is in the same directory as spice.py.  Change as needed.

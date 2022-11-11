@@ -1,45 +1,39 @@
-import os
-import json
 import itertools
-from typing import Sequence, List, Tuple, Any, Optional
+import json
+import os
+from typing import Any, List, Optional, Sequence, Tuple
 
 import click
+import mauve
 import numpy as np
 import rich
-from rich.table import Table
-from rich.progress import track
 import torch
+from bert_score import BERTScorer
+
+try:
+    from bleurt import score as bleurt_score
+except ImportError:
+    bleurt_score = None
+from rich.progress import track
+from rich.table import Table
 
 # from vdtk.metrics.bleu.bleu import Bleu
 from vdtk.metrics.bleu.bleu import Bleu
 from vdtk.metrics.cider.cider import CiderBase as Cider
-from vdtk.metrics.rouge.rouge import RougeBase as Rouge
+from vdtk.metrics.distribution import (MetricScorer, MMDBertMetricScorer,
+                                       MMDCLIPMetricScorer,
+                                       MMDFastTextMetricScorer,
+                                       MMDGloveMetricScorer,
+                                       TriangleRankMetricScorer)
+from vdtk.metrics.distribution.distance import (BERTDistance,
+                                                BERTScoreDistance,
+                                                BLEU4Distance, BLEURTDistance,
+                                                CIDERDDistance, MeteorDistance,
+                                                ROUGELDistance)
 from vdtk.metrics.meteor.meteor import MeteorBase as Meteor
+from vdtk.metrics.rouge.rouge import RougeBase as Rouge
 from vdtk.metrics.spice.spice import Spice
 from vdtk.metrics.tokenizer.ptbtokenizer import PTBTokenizer
-
-from vdtk.metrics.distribution import (
-    TriangleRankMetricScorer,
-    MetricScorer,
-    MMDBertMetricScorer,
-    MMDCLIPMetricScorer,
-    MMDFastTextMetricScorer,
-    MMDGloveMetricScorer,
-)
-from vdtk.metrics.distribution.distance import (
-    BLEU4Distance,
-    CIDERDDistance,
-    MeteorDistance,
-    ROUGELDistance,
-    BLEURTDistance,
-    BERTDistance,
-    BERTScoreDistance,
-)
-
-
-from bleurt import score as bleurt_score
-from bert_score import BERTScorer
-import mauve
 
 
 @click.group()
@@ -207,6 +201,11 @@ def _spice(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tu
 
 
 def _bleurt(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tuple[float, List[float]]]:
+
+    if bleurt_score is None:
+        raise ImportError("BLEURT requires the bleurt package to be installed.")
+    assert bleurt_score is not None
+
     scores = []
     for path in dataset_paths:
         # Load the candidates and references from the dataset

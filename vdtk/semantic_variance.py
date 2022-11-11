@@ -4,9 +4,9 @@ from typing import Optional
 
 import click
 import numpy as np
+from rich.console import Console
 from rich.progress import track
 from rich.table import Table
-from rich.console import Console
 
 from vdtk.data_utils import load_dataset
 from vdtk.stats_utils import descr
@@ -100,7 +100,7 @@ def semantic_variance(dataset_path: str, split: Optional[str] = None, candidates
             f"{_stats['stddev']:.2f}",
             f"{_stats['25q']:.2f}",
             f"{_stats['75q']:.2f}",
-            f"{_stats['s95ci'][0]:.2f} - {_stats['s95ci'][1]:.2f}", # type: ignore
+            f"{_stats['s95ci'][0]:.2f} - {_stats['s95ci'][1]:.2f}",  # type: ignore
         )
 
     console = Console()

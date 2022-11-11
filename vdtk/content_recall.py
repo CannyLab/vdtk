@@ -1,14 +1,13 @@
-from typing import List, Tuple, Any, Optional
 import logging
 import os
+from typing import Any, List, Optional, Tuple
 
-
-import spacy
-import numpy as np
 import click
+import numpy as np
 import rich
-from rich.table import Table
+import spacy
 from rich.progress import track
+from rich.table import Table
 
 from vdtk.data_utils import load_dataset
 from vdtk.score import _handle_baseline_index

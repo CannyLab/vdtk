@@ -7,9 +7,8 @@ from functools import lru_cache
 
 import numpy as np
 
-from .normalize import coco_normalize
-
 from . import DistanceFunction
+from .normalize import coco_normalize
 
 
 def precook(s, n=4, out=False):

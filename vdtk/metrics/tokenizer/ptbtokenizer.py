@@ -8,13 +8,14 @@
 # Last Modified : Thu Mar 19 09:53:35 2015
 # Authors : Hao Fang <hfang@uw.edu> and Tsung-Yi Lin <tl483@cornell.edu>
 
-import os
-import sys
-import subprocess
-import tempfile
 import itertools
+import os
+import subprocess
+import sys
+import tempfile
 
 from jdk4py import JAVA
+
 from vdtk.metrics.corenlp import CORENLP_JAVA_LIBDIR
 
 # path to the stanford corenlp jar

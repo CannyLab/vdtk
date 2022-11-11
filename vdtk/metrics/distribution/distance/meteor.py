@@ -2,9 +2,8 @@ from functools import lru_cache
 
 import nltk
 
-from .normalize import coco_normalize
-
 from . import DistanceFunction
+from .normalize import coco_normalize
 
 
 class MeteorDistance(DistanceFunction):

@@ -2,9 +2,8 @@ from functools import lru_cache
 
 from rouge_score import rouge_scorer
 
-from .normalize import coco_normalize
-
 from . import DistanceFunction
+from .normalize import coco_normalize
 
 
 class ROUGELDistance(DistanceFunction):

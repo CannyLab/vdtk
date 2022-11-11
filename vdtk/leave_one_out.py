@@ -5,9 +5,10 @@ from typing import Optional
 import click
 import numpy as np
 from mpire import WorkerPool
-from rich.progress import track, Progress, BarColumn, TimeRemainingColumn, TextColumn, TimeElapsedColumn, SpinnerColumn
-from rich.table import Table
 from rich.console import Console
+from rich.progress import (BarColumn, Progress, SpinnerColumn, TextColumn,
+                           TimeElapsedColumn, TimeRemainingColumn, track)
+from rich.table import Table
 
 from vdtk.data_utils import load_dataset
 from vdtk.metrics.bleu.bleu import Bleu

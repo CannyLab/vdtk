@@ -4,11 +4,12 @@
 # Acknowledge Michael Denkowski for the generous discussion and help
 
 import os
-import sys
 import subprocess
+import sys
 import threading
 
 from jdk4py import JAVA
+
 from vdtk.metrics.corenlp import CORENLP_JAVA_LIBDIR
 
 METEOR_JAR = os.path.join(CORENLP_JAVA_LIBDIR, "lib", "Meteor-1.5.jar")

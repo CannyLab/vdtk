@@ -1,7 +1,10 @@
 import os
 from functools import lru_cache
 
-from bleurt import score
+try:
+    from bleurt import score
+except ImportError:
+    score = None
 
 from . import DistanceFunction
 
@@ -10,6 +13,9 @@ class BLEURTDistance(DistanceFunction):
     def __init__(
         self,
     ):
+        if score is None:
+            raise ImportError("BLEURT is not installed. Please install it with " "`pip install bleurt`.")
+
         super().__init__()
         self._scorer = score.BleurtScorer(checkpoint=os.path.expanduser("~/.cache/bleurt/BLEURT-20"))
 

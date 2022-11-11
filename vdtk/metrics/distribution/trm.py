@@ -2,7 +2,7 @@ import itertools
 import logging
 import random
 from enum import Enum
-from typing import Any, Dict, Optional, Sequence, Type, Union, Tuple
+from typing import Any, Dict, Optional, Sequence, Tuple, Type, Union
 
 import numpy as np
 

@@ -1,7 +1,7 @@
 import logging
 import os
 from collections import defaultdict
-from typing import Optional, List
+from typing import List, Optional
 
 import click
 import numpy as np
@@ -9,10 +9,11 @@ import rich
 from fuzzysearch import find_near_matches
 from fuzzywuzzy import process
 from mpire import WorkerPool
-from rich.progress import track, Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn, TimeRemainingColumn
+from rich.progress import (BarColumn, Progress, SpinnerColumn, TextColumn,
+                           TimeElapsedColumn, TimeRemainingColumn, track)
 from rich.table import Table
 
-from vdtk.data_utils import load_dataset, Sample
+from vdtk.data_utils import Sample, load_dataset
 from vdtk.metrics.bleu.bleu import Bleu
 from vdtk.metrics.rouge.rouge import Rouge
 

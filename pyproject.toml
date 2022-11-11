@@ -1,0 +1,105 @@
+[project]
+name = "vdtk"
+description = "Visual Description Evaluation Toolkit"
+dynamic = ["version", "readme"]
+license = {text = "MIT"}
+authors = [
+    { name = "David Chan", email = "davidchan@berkeley.edu" }
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Scientific/Engineering :: Information Analysis"
+]
+dependencies = [
+    "nltk >= 3.6.5",
+    "numpy >= 1.21.4",
+    "matplotlib >= 3.5.0",
+    "tqdm >= 4.62.3",
+    "spacy >= 3.2.0",
+    "textdistance >= 4.2.2",
+    "fuzzywuzzy >= 0.18.0",
+    "absl-py >= 1.0.0",
+    "python-Levenshtein >= 0.12.2",
+    "rich >= 10.14.0",
+    "msgpack >= 1.0.2",
+    "mpire >= 2.3.1",
+    "click >= 8.0.3",
+    "fuzzysearch >= 0.7.3",
+    "sentence-transformers >= 2.1.0",
+    "bert-score >= 0.3.12",
+    "embeddings >= 0.0.8",
+    "POT >= 0.8",
+    "rouge-score >= 0.1.2",
+    "jdk4py >= 17.0.3.0",
+    "clip @ git+https://github.com/openai/CLIP.git",
+    "mauve-text @ git+https://github.com/krishnap25/mauve.git",
+    "en_core_web_lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.4.1/en_core_web_lg-3.4.1-py3-none-any.whl",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "mypy", "black", "flake8", "flake8-black", "isort"]
+bleurt = [
+    "bleurt @ git+https://github.com/google-research/bleurt.git",
+]
+all = { dependencies = ["dev", "bleurt"] }
+
+[project.scripts]
+vdtk = "vdtk.cli:main"
+
+
+[tool.setuptools.dynamic]
+version =  {attr = "vdtk.__version__"}
+readme = {file = ["README.md", "LICENSE"]}
+
+[tool.setuptools.packages]
+find = {}
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.mypy]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+disallow_untyped_calls = true
+no_implicit_optional = true
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 120
+target_version =['py38']
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )
+)
+'''
+
+[tool.isort]
+sections="FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"

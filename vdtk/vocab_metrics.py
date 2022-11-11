@@ -1,14 +1,14 @@
 import logging
 from collections import Counter
-from typing import Optional, List
+from typing import List, Optional
 
 import click
 import numpy as np
-from rich.table import Table
-from rich.progress import track
 from rich.console import Console
+from rich.progress import track
+from rich.table import Table
 
-from vdtk.data_utils import load_dataset, Sample
+from vdtk.data_utils import Sample, load_dataset
 
 
 def _compute_head_tokens(vocab_counts, ratio: float = 0.9):

@@ -10,13 +10,15 @@
 # Modified by:
 # Hao Fang <hfang@uw.edu>
 # Tsung-Yi Lin <tl483@cornell.edu>
-'''Provides:
+"""Provides:
 cook_refs(refs, n=4): Transform a list of reference sentences as strings into a form usable by cook_test().
 cook_test(test, refs, n=4): Transform a test sentence as a string (together with the cooked reference sentences) into a form usable by score_cooked().
-'''
+"""
 
 import copy
-import sys, math, re
+import math
+import re
+import sys
 from collections import defaultdict
 
 
@@ -28,15 +30,15 @@ def precook(s, n=4, out=False):
     counts = defaultdict(int)
     for k in range(1, n + 1):
         for i in range(len(words) - k + 1):
-            ngram = tuple(words[i:i + k])
+            ngram = tuple(words[i : i + k])
             counts[ngram] += 1
     return (len(words), counts)
 
 
 def cook_refs(refs, eff=None, n=4):  ## lhuang: oracle will call with "average"
-    '''Takes a list of reference sentences for a single segment
+    """Takes a list of reference sentences for a single segment
     and returns an object that encapsulates everything that BLEU
-    needs to know about them.'''
+    needs to know about them."""
 
     reflen = []
     maxcounts = {}
@@ -60,8 +62,8 @@ def cook_refs(refs, eff=None, n=4):  ## lhuang: oracle will call with "average"
 
 
 def cook_test(test, xxx_todo_changeme, eff=None, n=4):
-    '''Takes a test sentence and returns an object that
-    encapsulates everything that BLEU needs to know about it.'''
+    """Takes a test sentence and returns an object that
+    encapsulates everything that BLEU needs to know about it."""
     (reflen, refmaxcounts) = xxx_todo_changeme
     testlen, counts = precook(test, n, True)
 
@@ -78,7 +80,7 @@ def cook_test(test, xxx_todo_changeme, eff=None, n=4):
 
     result["guess"] = [max(0, testlen - k + 1) for k in range(1, n + 1)]
 
-    result['correct'] = [0] * n
+    result["correct"] = [0] * n
     for (ngram, count) in counts.items():
         result["correct"][len(ngram) - 1] += min(refmaxcounts.get(ngram, 0), count)
 
@@ -86,15 +88,14 @@ def cook_test(test, xxx_todo_changeme, eff=None, n=4):
 
 
 class BleuScorer(object):
-    """Bleu scorer.
-    """
+    """Bleu scorer."""
 
     __slots__ = "n", "crefs", "ctest", "_score", "_ratio", "_testlen", "_reflen", "special_reflen"
 
     # special_reflen is used in oracle (proportional effective ref len for a node).
 
     def copy(self):
-        ''' copy the refs.'''
+        """copy the refs."""
         new = BleuScorer(n=self.n)
         new.ctest = copy.copy(self.ctest)
         new.crefs = copy.copy(self.crefs)
@@ -102,7 +103,7 @@ class BleuScorer(object):
         return new
 
     def __init__(self, test=None, refs=None, n=4, special_reflen=None):
-        ''' singular instance '''
+        """singular instance"""
 
         self.n = n
         self.crefs = []
@@ -111,7 +112,7 @@ class BleuScorer(object):
         self.special_reflen = special_reflen
 
     def cook_append(self, test, refs):
-        '''called by constructor and __iadd__ to avoid creating new instances.'''
+        """called by constructor and __iadd__ to avoid creating new instances."""
 
         if refs is not None:
             self.crefs.append(cook_refs(refs))
@@ -128,7 +129,7 @@ class BleuScorer(object):
         return self._ratio
 
     def score_ratio(self, option=None):
-        '''return (bleu, len_ratio) pair'''
+        """return (bleu, len_ratio) pair"""
         return (self.fscore(option=option), self.ratio(option=option))
 
     def score_ratio_str(self, option=None):
@@ -154,7 +155,7 @@ class BleuScorer(object):
         return self
 
     def rescore(self, new_test):
-        ''' replace test(s) with new test(s), and returns the new score.'''
+        """replace test(s) with new test(s), and returns the new score."""
 
         return self.retest(new_test).compute_score()
 
@@ -163,7 +164,7 @@ class BleuScorer(object):
         return len(self.crefs)
 
     def __iadd__(self, other):
-        '''add an instance (e.g., from another sentence).'''
+        """add an instance (e.g., from another sentence)."""
 
         if type(other) is tuple:
             ## avoid creating new BleuScorer instances
@@ -213,30 +214,29 @@ class BleuScorer(object):
 
         self._testlen = 0
         self._reflen = 0
-        totalcomps = {'testlen': 0, 'reflen': 0, 'guess': [0] * n, 'correct': [0] * n}
+        totalcomps = {"testlen": 0, "reflen": 0, "guess": [0] * n, "correct": [0] * n}
 
         # for each sentence
         for comps in self.ctest:
-            testlen = comps['testlen']
+            testlen = comps["testlen"]
             self._testlen += testlen
 
             if self.special_reflen is None:  ## need computation
-                reflen = self._single_reflen(comps['reflen'], option, testlen)
+                reflen = self._single_reflen(comps["reflen"], option, testlen)
             else:
                 reflen = self.special_reflen
 
             self._reflen += reflen
 
-            for key in ['guess', 'correct']:
+            for key in ["guess", "correct"]:
                 for k in range(n):
                     totalcomps[key][k] += comps[key][k]
 
             # append per image bleu score
-            bleu = 1.
+            bleu = 1.0
             for k in range(n):
-                bleu *= (float(comps['correct'][k]) + tiny) \
-                        /(float(comps['guess'][k]) + small)
-                bleu_list[k].append(bleu**(1. / (k + 1)))
+                bleu *= (float(comps["correct"][k]) + tiny) / (float(comps["guess"][k]) + small)
+                bleu_list[k].append(bleu ** (1.0 / (k + 1)))
             ratio = (testlen + tiny) / (reflen + small)  ## N.B.: avoid zero division
             if ratio < 1:
                 for k in range(n):
@@ -245,15 +245,14 @@ class BleuScorer(object):
             # if verbose > 1:
             #     print(comps, reflen)
 
-        totalcomps['reflen'] = self._reflen
-        totalcomps['testlen'] = self._testlen
+        totalcomps["reflen"] = self._reflen
+        totalcomps["testlen"] = self._testlen
 
         bleus = []
-        bleu = 1.
+        bleu = 1.0
         for k in range(n):
-            bleu *= float(totalcomps['correct'][k] + tiny) \
-                    / (totalcomps['guess'][k] + small)
-            bleus.append(bleu**(1. / (k + 1)))
+            bleu *= float(totalcomps["correct"][k] + tiny) / (totalcomps["guess"][k] + small)
+            bleus.append(bleu ** (1.0 / (k + 1)))
         ratio = (self._testlen + tiny) / (self._reflen + small)  ## N.B.: avoid zero division
         if ratio < 1:
             for k in range(n):

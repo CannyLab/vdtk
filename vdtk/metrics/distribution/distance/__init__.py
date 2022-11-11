@@ -5,7 +5,7 @@ class DistanceFunction:
 
 from .bert import BERTDistance, BERTScoreDistance
 from .bleu import BLEU4Distance
+from .bleurt import BLEURTDistance
 from .cider import CIDERDDistance, CIDERDScore
 from .meteor import MeteorDistance
 from .rouge import ROUGELDistance
-from .bleurt import BLEURTDistance

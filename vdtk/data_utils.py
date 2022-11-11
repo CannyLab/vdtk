@@ -1,10 +1,10 @@
 import json
+import os
 from dataclasses import dataclass, field
 from typing import Any, List, Optional, Tuple
 
 import numpy as np
 import spacy
-import os
 from sentence_transformers import SentenceTransformer
 
 

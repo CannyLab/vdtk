@@ -20,14 +20,12 @@ Chin-Yew Lin, Franz Josef Och. ORANGE: a method for evaluating automatic
 evaluation metrics for machine translation. COLING 2004.
 """
 
-from functools import lru_cache
-
-from . import DistanceFunction
-
 import collections
 import math
+from functools import lru_cache
 from typing import Counter, List, Sequence, Tuple
 
+from . import DistanceFunction
 from .normalize import coco_normalize
 
 

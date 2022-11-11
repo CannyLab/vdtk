@@ -1,7 +1,8 @@
 from typing import Callable, Iterable, List, Optional, Sequence, TypeVar, Union
 
 from rich.console import Console
-from rich.progress import BarColumn, Progress, ProgressColumn, Task, TextColumn, TimeElapsedColumn, TimeRemainingColumn
+from rich.progress import (BarColumn, Progress, ProgressColumn, Task,
+                           TextColumn, TimeElapsedColumn, TimeRemainingColumn)
 from rich.style import StyleType
 from rich.table import Column
 from rich.text import Text

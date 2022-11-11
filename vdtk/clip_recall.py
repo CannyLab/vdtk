@@ -1,17 +1,17 @@
 import os
-from typing import List, Tuple, Any, Optional
 from functools import lru_cache
+from typing import Any, List, Optional, Tuple
 
-import torch
-import numpy as np
 import click
 import clip
+import numpy as np
 import rich
+import torch
 from PIL import Image
-from rich.table import Table
 from rich.progress import track
+from rich.table import Table
 
-from vdtk.data_utils import load_dataset, Sample
+from vdtk.data_utils import Sample, load_dataset
 from vdtk.score import _handle_baseline_index
 from vdtk.utils.rich import baseline_column
 

@@ -3,7 +3,8 @@ import itertools
 import logging
 import random
 from dataclasses import dataclass
-from typing import Any, Dict, Generator, List, Mapping, Optional, Sequence, Tuple, TypeVar
+from typing import (Any, Dict, Generator, List, Mapping, Optional, Sequence,
+                    Tuple, TypeVar)
 
 import mpire
 import numpy as np

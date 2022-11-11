@@ -1,5 +1,6 @@
+from typing import Any, List
+
 import numpy as np
-from typing import List, Any
 
 
 def baseline_column(

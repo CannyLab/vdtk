@@ -5,16 +5,16 @@ import click
 from rich.logging import RichHandler
 
 from vdtk.caption_metrics import caption_stats
+from vdtk.clip_recall import clip_recall
 from vdtk.concept_metrics import concept_leave_one_out, concept_overlap
+from vdtk.content_recall import content_recall
 from vdtk.core_set import coreset
 from vdtk.leave_one_out import leave_one_out
 from vdtk.ngram_metrics import ngram_stats
 from vdtk.qualitative_sample import qualitative_sample
+from vdtk.score import score
 from vdtk.semantic_variance import semantic_variance
 from vdtk.vocab_metrics import vocab_stats
-from vdtk.score import score
-from vdtk.content_recall import content_recall
-from vdtk.clip_recall import clip_recall
 
 FORMAT = "%(message)s"
 logging.basicConfig(level=logging.WARNING, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
