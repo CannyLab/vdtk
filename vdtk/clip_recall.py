@@ -15,9 +15,16 @@ from vdtk.data_utils import Sample, load_dataset
 from vdtk.score import _handle_baseline_index
 from vdtk.utils.rich import baseline_column
 
+Result = List[
+    Tuple[
+        Tuple[List[np.floating], List[np.floating], List[np.floating], List[np.floating], List[np.floating]],
+        Tuple[List[np.floating], List[np.floating], List[np.floating], List[np.floating], List[np.floating]],
+    ],
+]
+
 
 @lru_cache
-def clip_model():
+def clip_model() -> Tuple[Any, Any, Any]:
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, preprocess = clip.load("ViT-B/32", device=device)
     return model, preprocess, device
@@ -26,7 +33,7 @@ def clip_model():
 @lru_cache
 def _get_feature(media_path: str) -> torch.Tensor:
     model, preprocess, device = clip_model()
-    image = preprocess(Image.open(media_path)).unsqueeze(0).to(device)  # type: ignore
+    image = preprocess(Image.open(media_path)).unsqueeze(0).to(device)
     with torch.no_grad():
         image_features = model.encode_image(image)
         image_features = image_features / image_features.norm(dim=-1, keepdim=True)
@@ -55,7 +62,15 @@ def _get_text_features(
     return candidate_text_features, reference_text_features
 
 
-def _add_table_row(i, baseline_index, table, name, scores, outputs, is_candidate):
+def _add_table_row(
+    i: int,
+    baseline_index: Optional[int],
+    table: Table,
+    name: str,
+    scores: np.ndarray,
+    outputs: Result,
+    is_candidate: bool,
+) -> None:
     (rank, rrank, recall_1, recall_5, recall_max) = scores
 
     if i is None:
@@ -84,7 +99,13 @@ def _add_table_row(i, baseline_index, table, name, scores, outputs, is_candidate
                 baseline_column(rrank, outputs[baseline_index][1][1]),  # type: ignore
                 baseline_column(recall_1, outputs[baseline_index][1][2]),  # type: ignore
                 baseline_column(recall_5, outputs[baseline_index][1][3]),  # type: ignore
-                baseline_column(recall_max, outputs[baseline_index][1][4], aggregate=np.amax, baseline_aggregate=np.amax, positive=False),  # type: ignore
+                baseline_column(
+                    recall_max,
+                    outputs[baseline_index][1][4],  # type: ignore
+                    aggregate=np.amax,
+                    baseline_aggregate=np.amax,
+                    positive=False,
+                ),
             )
 
 
@@ -101,7 +122,7 @@ def clip_recall(
     # Get the baseline
     baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
 
-    outputs = []
+    outputs: List[Result] = []
     for ds in dataset_paths:
         data = load_dataset(ds, media_root)
         if split is not None:
@@ -139,7 +160,7 @@ def clip_recall(
                     # Recall at 5
                     [np.mean(i <= 5) for i in candidate_scores],
                     # 100% recall at
-                    [np.amax(i) for i in candidate_scores],
+                    [np.amax(i) for i in candidate_scores],  # type: ignore
                 ),
                 (
                     # rank
@@ -155,6 +176,7 @@ def clip_recall(
                 ),
             )
         )
+
     # Print the results
     table = Table(title="CLIP Recall")
     table.add_column("Dataset", justify="left", style="cyan", no_wrap=True)
@@ -163,11 +185,24 @@ def clip_recall(
     table.add_column("Recall @ 1", justify="right", style="magenta")
     table.add_column("Recall @ 5", justify="right", style="magenta")
     table.add_column("100% Recall", justify="right", style="magenta")
-    for i, (ds, (candidate_scores, reference_scores)) in enumerate(zip(dataset_paths, outputs)):
+    for i, (ds, (candidate_scores, reference_scores)) in enumerate(zip(dataset_paths, outputs)):  # type: ignore
         # Add The candidate scores
-        _add_table_row(i, baseline_index, table, os.path.basename(ds) + " (candidate)", candidate_scores, outputs, True)
-        # Add the reference scores
         _add_table_row(
-            i, baseline_index, table, os.path.basename(ds) + " (reference)", reference_scores, outputs, False
+            i,
+            baseline_index,
+            table,
+            os.path.basename(ds) + " (candidate)",
+            candidate_scores,  # type: ignore
+            outputs,  # type: ignore
+            True,
+        )
+        _add_table_row(
+            i,
+            baseline_index,
+            table,
+            os.path.basename(ds) + " (reference)",
+            reference_scores,  # type: ignore
+            outputs,  # type: ignore
+            False,
         )
     rich.print(table)

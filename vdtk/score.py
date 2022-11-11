@@ -20,16 +20,23 @@ from rich.table import Table
 # from vdtk.metrics.bleu.bleu import Bleu
 from vdtk.metrics.bleu.bleu import Bleu
 from vdtk.metrics.cider.cider import CiderBase as Cider
-from vdtk.metrics.distribution import (MetricScorer, MMDBertMetricScorer,
-                                       MMDCLIPMetricScorer,
-                                       MMDFastTextMetricScorer,
-                                       MMDGloveMetricScorer,
-                                       TriangleRankMetricScorer)
-from vdtk.metrics.distribution.distance import (BERTDistance,
-                                                BERTScoreDistance,
-                                                BLEU4Distance, BLEURTDistance,
-                                                CIDERDDistance, MeteorDistance,
-                                                ROUGELDistance)
+from vdtk.metrics.distribution import (
+    MetricScorer,
+    MMDBertMetricScorer,
+    MMDCLIPMetricScorer,
+    MMDFastTextMetricScorer,
+    MMDGloveMetricScorer,
+    TriangleRankMetricScorer,
+)
+from vdtk.metrics.distribution.distance import (
+    BERTDistance,
+    BERTScoreDistance,
+    BLEU4Distance,
+    BLEURTDistance,
+    CIDERDDistance,
+    MeteorDistance,
+    ROUGELDistance,
+)
 from vdtk.metrics.meteor.meteor import MeteorBase as Meteor
 from vdtk.metrics.rouge.rouge import RougeBase as Rouge
 from vdtk.metrics.spice.spice import Spice
@@ -165,8 +172,7 @@ def _bleu(
             references = tokenizer.tokenize(references)
             candidates = tokenizer.tokenize(candidates)
 
-        avg_scores, score = Bleu().compute_score(references, candidates, return_scores=True)
-        # avg_scores, score = Bleu(4).compute_score(references, candidates)
+        avg_scores, score = Bleu().compute_score_flat(references, candidates)
 
         scores.append(
             (

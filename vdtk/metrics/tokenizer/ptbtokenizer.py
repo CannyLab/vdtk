@@ -8,11 +8,10 @@
 # Last Modified : Thu Mar 19 09:53:35 2015
 # Authors : Hao Fang <hfang@uw.edu> and Tsung-Yi Lin <tl483@cornell.edu>
 
-import itertools
 import os
 import subprocess
-import sys
 import tempfile
+from typing import Dict, List, TypeVar
 
 from jdk4py import JAVA
 
@@ -43,11 +42,13 @@ PUNCTUATIONS = [
     ";",
 ]
 
+T = TypeVar("T")
+
 
 class PTBTokenizer:
     """Python wrapper of Stanford PTBTokenizer"""
 
-    def tokenize(self, captions_for_image):
+    def tokenize(self, captions_for_image: Dict[T, List[str]]) -> Dict[T, List[str]]:
         cmd = [
             str(JAVA),
             "-cp",
@@ -61,7 +62,7 @@ class PTBTokenizer:
         # prepare data for PTB Tokenizer
         # ======================================================
 
-        final_tokenized_captions_for_image = {}
+        final_tokenized_captions_for_image: Dict[T, List[str]] = {}
         image_id = [k for k, v in list(captions_for_image.items()) for _ in range(len(v))]
         sentences = "\n".join([c.replace("\n", " ") for k, v in list(captions_for_image.items()) for c in v])
 
@@ -78,7 +79,7 @@ class PTBTokenizer:
         # ======================================================
         cmd.append(tmp_file.name)
         p_tokenizer = subprocess.Popen(cmd, cwd=path_to_jar_dirname, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-        token_lines = p_tokenizer.communicate(input=sentences)[0]
+        token_lines = p_tokenizer.communicate(input=sentences.encode("utf8"))[0]
         lines = token_lines.decode("utf-8").split("\n")
         # remove temp file
         os.remove(tmp_file.name)
@@ -87,14 +88,14 @@ class PTBTokenizer:
         # create dictionary for tokenized captions
         # ======================================================
         for k, line in zip(image_id, lines):
-            if not k in final_tokenized_captions_for_image:
+            if k not in final_tokenized_captions_for_image:
                 final_tokenized_captions_for_image[k] = []
             tokenized_caption = " ".join([w for w in line.rstrip().split(" ") if w not in PUNCTUATIONS])
             final_tokenized_captions_for_image[k].append(tokenized_caption)
 
         return final_tokenized_captions_for_image
 
-    def tokenize_flat(self, captions):
+    def tokenize_flat(self, captions: List[str]) -> List[str]:
         cmd = [
             str(JAVA),
             "-cp",
@@ -116,7 +117,7 @@ class PTBTokenizer:
         # Tokenize
         cmd.append(tmp_file.name)
         p_tokenizer = subprocess.Popen(cmd, cwd=path_to_jar_dirname, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-        token_lines = p_tokenizer.communicate(input=sentences)[0]
+        token_lines = p_tokenizer.communicate(input=sentences.encode("utf8"))[0]
         lines = token_lines.decode("utf-8").split("\n")
         # remove temp file
         os.remove(tmp_file.name)

@@ -129,9 +129,9 @@ def leave_one_out(
                 f"{value['min']:.2f}",
                 f"{value['max']:.2f}",
                 f"{value['stddev']:.2f}",
-                f"{value['25q']:.2f}",
-                f"{value['75q']:.2f}",
-                f"{value['s95ci'][0]:.2f} - {value['s95ci'][1]:.2f}",  # type: ignore
+                f"{value['q25']:.2f}",
+                f"{value['q75']:.2f}",
+                f"{value['s95ci'][0]:.2f} - {value['s95ci'][1]:.2f}",
             ],
         )
 

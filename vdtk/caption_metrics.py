@@ -67,8 +67,8 @@ def caption_stats(dataset_path: str, split: Optional[str] = None, candidates: bo
         f"{tokens_per_caption['min']:.2f}",
         f"{tokens_per_caption['max']:.2f}",
         f"{tokens_per_caption['stddev']:.2f}",
-        f"{tokens_per_caption['25q']:.2f}",
-        f"{tokens_per_caption['75q']:.2f}",
+        f"{tokens_per_caption['q25']:.2f}",
+        f"{tokens_per_caption['q75']:.2f}",
         f"{tokens_per_caption['s95ci'][0]:.2f} - {tokens_per_caption['s95ci'][1]:.2f}",
     )
     table.add_row(
@@ -78,8 +78,8 @@ def caption_stats(dataset_path: str, split: Optional[str] = None, candidates: bo
         f"{captions_per_video['min']:.2f}",
         f"{captions_per_video['max']:.2f}",
         f"{captions_per_video['stddev']:.2f}",
-        f"{captions_per_video['25q']:.2f}",
-        f"{captions_per_video['75q']:.2f}",
+        f"{captions_per_video['q25']:.2f}",
+        f"{captions_per_video['q75']:.2f}",
         f"{captions_per_video['s95ci'][0]:.2f} - {captions_per_video['s95ci'][1]:.2f}",
     )
     table.add_row(
@@ -89,8 +89,8 @@ def caption_stats(dataset_path: str, split: Optional[str] = None, candidates: bo
         f"{unique_captions_per_video['min']:.2f}",
         f"{unique_captions_per_video['max']:.2f}",
         f"{unique_captions_per_video['stddev']:.2f}",
-        f"{unique_captions_per_video['25q']:.2f}",
-        f"{unique_captions_per_video['75q']:.2f}",
+        f"{unique_captions_per_video['q25']:.2f}",
+        f"{unique_captions_per_video['q75']:.2f}",
         f"{unique_captions_per_video['s95ci'][0]:.2f} - {unique_captions_per_video['s95ci'][1]:.2f}",
     )
 

@@ -24,7 +24,7 @@ warnings.filterwarnings("ignore")
 
 
 @click.group()
-def cli():
+def cli() -> None:
     pass
 
 

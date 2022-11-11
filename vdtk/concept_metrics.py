@@ -1,7 +1,7 @@
 import logging
 import os
 from collections import defaultdict
-from typing import List, Optional
+from typing import Dict, Generator, List, Optional, Tuple
 
 import click
 import numpy as np
@@ -9,8 +9,7 @@ import rich
 from fuzzysearch import find_near_matches
 from fuzzywuzzy import process
 from mpire import WorkerPool
-from rich.progress import (BarColumn, Progress, SpinnerColumn, TextColumn,
-                           TimeElapsedColumn, TimeRemainingColumn, track)
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, TimeRemainingColumn, track
 from rich.table import Table
 
 from vdtk.data_utils import Sample, load_dataset
@@ -26,13 +25,13 @@ CONCEPT_SETS = {
 }
 
 
-def _load_concepts(concept_set):
+def _load_concepts(concept_set: str) -> List[str]:
     with open(concept_set) as f:
         concepts = [line.strip() for line in f]
     return concepts
 
 
-def _fuzzy_extract(qs, ls, threshold):
+def _fuzzy_extract(qs: str, ls: str, threshold: int) -> Generator[Tuple[str, int], None, None]:
     """fuzzy matches 'qs' in 'ls' and returns list of
     tuples of (word,index)
     """
@@ -43,7 +42,7 @@ def _fuzzy_extract(qs, ls, threshold):
             yield (match, index)
 
 
-def _match_concept(concept, reference, fuzzy=False, fuzzy_threshold=90):
+def _match_concept(concept: str, reference: str, fuzzy: bool = False, fuzzy_threshold: int = 90) -> bool:
     if fuzzy:
         return len(list(_fuzzy_extract(concept, reference, fuzzy_threshold))) > 0
     return concept in reference
@@ -51,7 +50,7 @@ def _match_concept(concept, reference, fuzzy=False, fuzzy_threshold=90):
 
 def _compute_overlap(
     data: List[Sample], concept_set: str, fuzzy: bool = False, fuzzy_threshold: int = 90, candidates: bool = False
-):
+) -> Tuple[List[Sample], Dict[str, set]]:
     logging.info(f"Computing overlap with {concept_set}")
     concepts = _load_concepts(CONCEPT_SETS[concept_set])
     matched_captions = defaultdict(set)
@@ -68,7 +67,7 @@ def _compute_overlap(
     return matches, matched_captions
 
 
-def _leave_one_out(data, concept_overlap, concept_set, fuzzy, fuzzy_threshold, candidates):
+def _leave_one_out(data: List[Sample], concept_overlap, concept_set, fuzzy, fuzzy_threshold, candidates):
     _, matched_concepts = concept_overlap
     logging.info(f"Computing leave-one-out for {concept_set}")
 

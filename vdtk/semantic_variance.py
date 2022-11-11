@@ -98,9 +98,9 @@ def semantic_variance(dataset_path: str, split: Optional[str] = None, candidates
             f"{_stats['min']:.2f}",
             f"{_stats['max']:.2f}",
             f"{_stats['stddev']:.2f}",
-            f"{_stats['25q']:.2f}",
-            f"{_stats['75q']:.2f}",
-            f"{_stats['s95ci'][0]:.2f} - {_stats['s95ci'][1]:.2f}",  # type: ignore
+            f"{_stats['q25']:.2f}",
+            f"{_stats['q75']:.2f}",
+            f"{_stats['s95ci'][0]:.2f} - {_stats['s95ci'][1]:.2f}",
         )
 
     console = Console()

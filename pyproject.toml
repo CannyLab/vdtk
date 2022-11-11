@@ -48,10 +48,18 @@ dev = ["pytest", "mypy", "black", "flake8", "flake8-black", "isort"]
 bleurt = [
     "bleurt @ git+https://github.com/google-research/bleurt.git",
 ]
-all = { dependencies = ["dev", "bleurt"] }
+all = [
+    "pytest",
+    "mypy",
+    "black",
+    "flake8",
+    "flake8-black",
+    "isort",
+    "bleurt @ git+https://github.com/google-research/bleurt.git",
+]
 
 [project.scripts]
-vdtk = "vdtk.cli:main"
+vdtk = "vdtk.cli:cli"
 
 
 [tool.setuptools.dynamic]
