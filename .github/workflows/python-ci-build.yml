@@ -18,10 +18,11 @@ jobs:
         with:
           python-version: '3.8'
           cache: 'pip'
-          cache-dependency-path: 'setup.cfg'
+          cache-dependency-path: 'pyproject.toml'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade --disable-pip-version-check pip
+          python -m pip install .[all]
       - name: Install latest pip, build, twine
         run: |
           python -m pip install --upgrade --disable-pip-version-check pip
