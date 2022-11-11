@@ -1,12 +1,10 @@
 from __future__ import division
 
-import ast
 import json
 import os
 import subprocess
-import sys
 import tempfile
-import threading
+from typing import Any, Dict, List, Tuple, TypeVar
 
 import numpy as np
 from jdk4py import JAVA
@@ -18,21 +16,25 @@ SPICE_JAR = os.path.join(CORENLP_JAVA_LIBDIR, "lib", "*")
 TEMP_DIR = "tmp"
 CACHE_DIR = "cache"
 
+T = TypeVar("T", str, int)
+
 
 class Spice:
     """
     Main Class to compute the SPICE metric
     """
 
-    def float_convert(self, obj):
+    def float_convert(self, obj: Any) -> float:
         try:
             return float(obj)
-        except:
+        except ValueError:
             return np.nan
 
-    def compute_score(self, gts, res):
-        assert sorted(gts.keys()) == sorted(res.keys())
-        imgIds = sorted(gts.keys())
+    def compute_score(
+        self, gts: Dict[T, List[str]], res: Dict[T, List[str]]
+    ) -> Tuple[float, List[Dict[str, Dict[str, float]]]]:
+        assert set(gts.keys()) == set(res.keys())
+        imgIds = list(sorted(gts.keys()))
 
         # Prepare temp input file for the SPICE scorer
         input_data = []
@@ -114,7 +116,8 @@ class Spice:
             for category, score_tuple in imgId_to_scores[image_id].items():
                 score_set[category] = {k: self.float_convert(v) for k, v in score_tuple.items()}
             scores.append(score_set)
-        return average_score, scores
 
-    def method(self):
+        return float(average_score), scores
+
+    def method(self) -> str:
         return "SPICE"

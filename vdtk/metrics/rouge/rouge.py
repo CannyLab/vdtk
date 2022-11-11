@@ -7,12 +7,14 @@
 # Creation Date : 2015-01-07 06:03
 # Author : Ramakrishna Vedantam <vrama91@vt.edu>
 
-import pdb
+from typing import Dict, List, Tuple, TypeVar
 
 import numpy as np
 
+T = TypeVar("T")
 
-def my_lcs(string, sub):
+
+def my_lcs(string: List[str], sub: List[str]) -> int:
     """
     Calculates longest common subsequence for a pair of tokenized strings
     :param string : list of str : tokens from a string split using whitespace
@@ -42,11 +44,11 @@ class Rouge:
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # vrama91: updated the value below based on discussion with Hovey
         self.beta = 1.2
 
-    def calc_score(self, candidate, refs):
+    def calc_score(self, candidate: List[str], refs: List[str]) -> float:
         """
         Compute ROUGE-L score given one candidate and references for an image
         :param candidate: str : candidate sentence to be evaluated
@@ -78,12 +80,14 @@ class Rouge:
             score = 0.0
         return score
 
-    def compute_score(self, gts, res):
+    def compute_score(self, gts: Dict[T, List[str]], res: Dict[T, List[str]]) -> Tuple[float, Dict[T, float]]:
         """
         Computes Rouge-L score given a set of reference and candidate sentences for the dataset
         Invoked by evaluate_captions.py
-        :param hypo_for_image: dict : candidate / test sentences with "image name" key and "tokenized sentences" as values
-        :param ref_for_image: dict : reference MS-COCO sentences with "image name" key and "tokenized sentences" as values
+        :param hypo_for_image: dict : candidate / test sentences with "image name" key and "tokenized sentences" as
+            values
+        :param ref_for_image: dict : reference MS-COCO sentences with "image name" key and "tokenized sentences" as
+            values
         :returns: average_score: float (mean ROUGE-L score computed by averaging scores for all the images)
         """
         # assert (list(gts.keys()) == list(res.keys()))
@@ -102,10 +106,10 @@ class Rouge:
             assert type(ref) is list
             assert len(ref) > 0
 
-        average_score = np.mean(np.array(score))
+        average_score = float(np.mean(np.array(score)))
         return average_score, dict(zip(imgIds, score))
 
-    def method(self):
+    def method(self) -> str:
         return "Rouge"
 
 
@@ -115,11 +119,11 @@ class RougeBase:
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # vrama91: updated the value below based on discussion with Hovey
         self.beta = 1.2
 
-    def calc_score(self, candidate, refs):
+    def calc_score(self, candidate: List[str], refs: List[str]) -> float:
         """
         Compute ROUGE-L score given one candidate and references for an image
         :param candidate: str : candidate sentence to be evaluated
@@ -151,12 +155,14 @@ class RougeBase:
             score = 0.0
         return score
 
-    def compute_score(self, gts, res):
+    def compute_score(self, gts: Dict[T, List[str]], res: Dict[T, List[str]]) -> Tuple[float, List[float]]:
         """
         Computes Rouge-L score given a set of reference and candidate sentences for the dataset
         Invoked by evaluate_captions.py
-        :param hypo_for_image: dict : candidate / test sentences with "image name" key and "tokenized sentences" as values
-        :param ref_for_image: dict : reference MS-COCO sentences with "image name" key and "tokenized sentences" as values
+        :param hypo_for_image: dict : candidate / test sentences with "image name" key and "tokenized sentences" as
+            values
+        :param ref_for_image: dict : reference MS-COCO sentences with "image name" key and "tokenized sentences" as
+            values
         :returns: average_score: float (mean ROUGE-L score computed by averaging scores for all the images)
         """
         assert gts.keys() == res.keys()
@@ -175,8 +181,8 @@ class RougeBase:
             assert type(ref) is list
             assert len(ref) > 0
 
-        average_score = np.mean(np.array(score))
-        return average_score, np.array(score)
+        average_score = float(np.mean(np.array(score)))
+        return average_score, score
 
-    def method(self):
+    def method(self) -> str:
         return "Rouge"

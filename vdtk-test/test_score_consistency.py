@@ -1,4 +1,4 @@
-def test_coco_score_consistency():
+def test_coco_score_consistency() -> None:
     import os
 
     import numpy as np
