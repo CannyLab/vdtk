@@ -7,8 +7,7 @@ from .normalize import coco_normalize
 
 
 class ROUGELDistance(DistanceFunction):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self) -> None:
         self.scorer = rouge_scorer.RougeScorer(["rougeL"])
 
     @lru_cache(None)

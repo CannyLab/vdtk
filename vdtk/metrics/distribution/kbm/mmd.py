@@ -1,4 +1,3 @@
-import warnings
 from functools import lru_cache
 from typing import Any, Dict, List, Optional, Sequence, Union
 
@@ -19,7 +18,7 @@ def calculate_mmd(x: torch.Tensor, y: torch.Tensor, sigma: Union[str, float] = "
     # n_perm number of bootstrap permutations to get p-value, pass none to not get p-value
 
     dists = torch.pdist(torch.cat([x, y], dim=0))
-    c = None
+    c: Optional[Union[torch.Tensor, float]] = None
     if isinstance(sigma, str):
         if sigma == "median":
             c = dists.median() / 2
@@ -54,8 +53,24 @@ def calculate_mmd(x: torch.Tensor, y: torch.Tensor, sigma: Union[str, float] = "
 
 
 class MMDBertMetricScorer(MetricScorer):
-    def __init__(self, mmd_sigma: Union[str, float] = "median", **kwargs: Any) -> None:
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        mmd_sigma: Union[str, float] = "median",
+        num_null_samples: int = 50,
+        num_workers: Optional[int] = None,
+        log_p: bool = False,
+        maintain_worker_state: bool = True,
+        quiet: bool = False,
+        supersample: bool = False,
+    ) -> None:
+        super().__init__(
+            num_null_samples,
+            num_workers,
+            log_p,
+            maintain_worker_state,
+            quiet,
+            supersample,
+        )
         self.mmd_sigma = mmd_sigma
 
     def _initialize_worker_state(self) -> Dict[str, Any]:
@@ -64,7 +79,7 @@ class MMDBertMetricScorer(MetricScorer):
 
         @lru_cache(None)
         def embedding_function(str: str) -> torch.Tensor:
-            with torch.no_grad():  # type: ignore
+            with torch.no_grad():
                 return model.encode([str], convert_to_tensor=True, show_progress_bar=False)[0]
 
         return {
@@ -77,7 +92,7 @@ class MMDBertMetricScorer(MetricScorer):
         references: Sequence[str],
         worker_state: Dict[str, Any],
     ) -> Optional[float]:
-        with torch.no_grad():  # type: ignore
+        with torch.no_grad():
             # calculate MMD
             act1 = torch.stack([worker_state["embedding_function"](candidate) for candidate in candidates], dim=0)
             act2 = torch.stack([worker_state["embedding_function"](reference) for reference in references], dim=0)
@@ -98,7 +113,7 @@ class MMDBaseMetricScorer(MetricScorer):
         references: Sequence[str],
         worker_state: Dict[str, Any],
     ) -> Optional[float]:
-        with torch.no_grad():  # type: ignore
+        with torch.no_grad():
             # calculate MMD
             act1 = torch.stack([worker_state["embedding_function"](candidate) for candidate in candidates], dim=0)
             act2 = torch.stack([worker_state["embedding_function"](reference) for reference in references], dim=0)

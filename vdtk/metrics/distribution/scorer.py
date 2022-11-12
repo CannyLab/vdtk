@@ -3,8 +3,7 @@ import itertools
 import logging
 import random
 from dataclasses import dataclass
-from typing import (Any, Dict, Generator, List, Mapping, Optional, Sequence,
-                    Tuple, TypeVar)
+from typing import Any, Dict, Generator, Iterable, List, Mapping, Optional, Sequence, Tuple, TypeVar
 
 import mpire
 import numpy as np
@@ -13,7 +12,7 @@ import torch
 from .utils.progress import track
 
 
-def null_track(iterable, *args, **kwargs):
+def null_track(iterable: Iterable, *args: Any, **kwargs: Any) -> Iterable:
     yield from iterable
 
 
@@ -42,8 +41,8 @@ def _iterate_partitions(
 T = TypeVar("T")
 
 
-def _upsample(sample: List[T], n: int) -> List[T]:
-    upsampled = copy.copy(sample)
+def _upsample(sample: Sequence[T], n: int) -> List[T]:
+    upsampled = list(copy.copy(sample))
     if n > 0:
         while len(upsampled) < n:
             upsampled.append(random.choice(sample))
@@ -129,7 +128,7 @@ class MetricScorer:
     def _call_init(self, worker_id: int, worker_state: Dict[str, Any]) -> None:
         # distribute GPUs across workers
         if torch.cuda.is_available():
-            torch.cuda.set_device(device=torch.cuda.device(worker_id % torch.cuda.device_count()))
+            torch.cuda.set_device(device=torch.cuda.device(worker_id % torch.cuda.device_count()))  # type: ignore
 
         worker_state["state"] = self._initialize_worker_state()
         worker_state["state"]["worker_id"] = worker_id
@@ -141,7 +140,7 @@ class MetricScorer:
         key: str,
         candidates: Sequence[str],
         references: Sequence[str],
-    ):
+    ) -> Tuple[str, Optional[SampleResult]]:
         try:
             return key, self.score(candidates, references, worker_state["state"])
         except Exception as e:
@@ -150,7 +149,10 @@ class MetricScorer:
             return (key, None)
 
     def __call__(
-        self, candidate_dataset: Mapping[str, Sequence[str]], reference_dataset: Mapping[str, Sequence[str]], _type=0
+        self,
+        candidate_dataset: Mapping[str, Sequence[str]],
+        reference_dataset: Mapping[str, Sequence[str]],
+        _type: int = 0,
     ) -> Dict[str, Optional[SampleResult]]:
 
         if self._supersample:
@@ -168,9 +170,9 @@ class MetricScorer:
                 else self._worker_state
             )
             if self._maintain_worker_state:
-                self._worker_state = worker_state
+                self._worker_state = worker_state  # type: ignore
 
-            for key in (null_track if self._quiet else track)(
+            for key in (null_track if self._quiet else track)(  # type: ignore
                 candidate_dataset, description="Computing test-statistics", transient=True
             ):
                 if key in reference_dataset:
@@ -186,7 +188,7 @@ class MetricScorer:
             args = [
                 (k, candidate_dataset[k], reference_dataset[k]) for k in candidate_dataset if k in reference_dataset
             ]
-            for sample in (null_track if self._quiet else track)(
+            for sample in (null_track if self._quiet else track)(  # type: ignore
                 pool.imap_unordered(self._call_process, args, worker_init=self._call_init),
                 total=len(args),
                 description="Computing test-statistics",
@@ -211,11 +213,11 @@ class MetricScorer:
                 else self._worker_state
             )
             if self._maintain_worker_state:
-                self._worker_state = worker_state
+                self._worker_state = worker_state  # type: ignore
             assert worker_state is not None
             scores: Dict[str, List[Optional[SampleResult]]] = {}
             for i in range(partitions):
-                for key, values in (null_track if self._quiet else track)(
+                for key, values in (null_track if self._quiet else track)(  # type: ignore
                     dataset.items(),
                     total=len(dataset),
                     description="Computing test-statistics for partition {} of {}".format(i + 1, partitions),
@@ -244,7 +246,7 @@ class MetricScorer:
                     logging.info("Computing partition {} of {}".format(i + 1, partitions))
                 # Compute random partitions of the data
                 args = [(k, *_random_split(v)) for k, v in dataset.items()]
-                for sample in (null_track if self._quiet else track)(
+                for sample in (null_track if self._quiet else track)(  # type: ignore
                     pool.imap_unordered(self._call_process, args, worker_init=self._call_init),
                     total=len(args),
                     description="Computing test-statistics for partition {} of {}".format(i + 1, partitions),

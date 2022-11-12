@@ -1,8 +1,7 @@
 from typing import Callable, Iterable, List, Optional, Sequence, TypeVar, Union
 
 from rich.console import Console
-from rich.progress import (BarColumn, Progress, ProgressColumn, Task,
-                           TextColumn, TimeElapsedColumn, TimeRemainingColumn)
+from rich.progress import BarColumn, Progress, ProgressColumn, Task, TextColumn, TimeElapsedColumn, TimeRemainingColumn
 from rich.style import StyleType
 from rich.table import Column
 from rich.text import Text
@@ -26,7 +25,7 @@ class MofNCompleteColumn(ProgressColumn):
     def render(self, task: "Task") -> Text:
         """Show completed/total."""
         completed = int(task.completed)
-        total = int(task.total)
+        total = int(task.total) if task.total is not None else "??"
         total_width = len(str(total))
         return Text(
             f"{completed:{total_width}d}{self.separator}{total}",

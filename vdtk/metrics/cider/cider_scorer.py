@@ -4,98 +4,90 @@
 
 import copy
 import math
-import pdb
+import pickle
 from collections import defaultdict
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
-
-def precook(s, n=4, out=False):
-    """
-    Takes a string as input and returns an object that can be given to
-    either cook_refs or cook_test. This is optional: cook_refs and cook_test
-    can take string arguments as well.
-    :param s: string : sentence to be converted into ngrams
-    :param n: int    : number of ngrams for which representation is calculated
-    :return: term frequency vector for occuring ngrams
-    """
-    words = s.split()
-    counts = defaultdict(int)
-    for k in range(1, n + 1):
-        for i in range(len(words) - k + 1):
-            ngram = tuple(words[i : i + k])
-            counts[ngram] += 1
-    return counts
+from vdtk.metrics.bleu.bleu_scorer import precook
 
 
-def cook_refs(refs, n=4):  ## lhuang: oracle will call with "average"
-    """Takes a list of reference sentences for a single segment
-    and returns an object that encapsulates everything that BLEU
-    needs to know about them.
-    :param refs: list of string : reference sentences for some image
-    :param n: int : number of ngrams for which (ngram) representation is calculated
-    :return: result (list of dict)
-    """
-    return [precook(ref, n) for ref in refs]
+def cook_refs(refs: List[str], n: int = 4) -> List[Dict[Tuple[str, ...], int]]:
+    return [precook(ref, n)[1] for ref in refs]
 
 
-def cook_test(test, n=4):
-    """Takes a test sentence and returns an object that
-    encapsulates everything that BLEU needs to know about it.
-    :param test: list of string : hypothesis sentence for some image
-    :param n: int : number of ngrams for which (ngram) representation is calculated
-    :return: result (dict)
-    """
-    return precook(test, n, True)
+def cook_test(test: str, n: int = 4) -> Dict[Tuple[str, ...], int]:
+    return precook(test, n, True)[1]
 
 
 class CiderScorer(object):
     """CIDEr scorer."""
 
-    def copy(self):
+    def copy(self) -> "CiderScorer":
         """copy the refs."""
         new = CiderScorer(n=self.n)
         new.ctest = copy.copy(self.ctest)
         new.crefs = copy.copy(self.crefs)
         return new
 
-    def __init__(self, test=None, refs=None, n=4, sigma=6.0):
+    def __init__(
+        self,
+        test: Optional[str] = None,
+        refs: Optional[List[str]] = None,
+        n: int = 4,
+        sigma: float = 6.0,
+        external_df_file: Optional[str] = None,
+        external_df_corpus_reflen: Optional[int] = None,
+    ) -> None:
         """singular instance"""
         self.n = n
         self.sigma = sigma
-        self.crefs = []
-        self.ctest = []
-        self.document_frequency = defaultdict(float)
+        self.crefs: List[List[Dict[Tuple[str, ...], int]]] = []
+        self.ctest: List[Optional[Dict[Tuple[str, ...], int]]] = []
+
+        self._external_df_file = external_df_file
+        if self._external_df_file is None:
+            self.document_frequency = defaultdict(float)
+            self.ref_len = None
+        else:
+            with open(self._external_df_file, "rb") as f:
+                u = pickle._Unpickler(f)
+                u.encoding = "latin1"  # type: ignore
+                pkl_file = u.load()
+                self.ref_len = external_df_corpus_reflen  # np.log(float(40504))
+                self.document_frequency = pkl_file
+
         self.cook_append(test, refs)
-        self.ref_len = None
 
-    def cook_append(self, test, refs):
+    def cook_append(self, test: Optional[str], refs: Optional[List[str]]) -> None:
         """called by constructor and __iadd__ to avoid creating new instances."""
-
         if refs is not None:
             self.crefs.append(cook_refs(refs))
             if test is not None:
-                self.ctest.append(cook_test(test))  ## N.B.: -1
+                self.ctest.append(cook_test(test))
             else:
-                self.ctest.append(None)  # lens of crefs and ctest have to match
+                self.ctest.append(None)
 
-    def size(self):
+    def clear(self) -> None:
+        self.crefs = []
+        self.ctest = []
+
+    def size(self) -> int:
         assert len(self.crefs) == len(self.ctest), "refs/test mismatch! %d<>%d" % (len(self.crefs), len(self.ctest))
         return len(self.crefs)
 
-    def __iadd__(self, other):
+    def __iadd__(self, other: Union[Tuple[str, List[str]], "CiderScorer"]) -> "CiderScorer":
         """add an instance (e.g., from another sentence)."""
-
-        if type(other) is tuple:
-            ## avoid creating new CiderScorer instances
-            self.cook_append(other[0], other[1])
-        else:
+        if isinstance(other, CiderScorer):
             self.ctest.extend(other.ctest)
             self.crefs.extend(other.crefs)
+        else:
+            self.cook_append(other[0], other[1])
 
         return self
 
-    def compute_doc_freq(self):
+    def compute_doc_freq(self) -> None:
         """
         Compute term frequency for reference data.
         This will be used to compute idf (inverse document frequency later)
@@ -108,8 +100,8 @@ class CiderScorer(object):
                 self.document_frequency[ngram] += 1
             # maxcounts[ngram] = max(maxcounts.get(ngram,0), count)
 
-    def compute_cider(self):
-        def counts2vec(cnts):
+    def compute_cider(self) -> List[float]:
+        def counts2vec(cnts: Dict[Tuple[str, ...], int]) -> Tuple[List[Dict[Tuple[str, ...], float]], List[float], int]:
             """
             Function maps counts of ngram to vector of tfidf weights.
             The function returns vec, an array of dictionary that store mapping of n-gram and tf-idf weights.
@@ -117,7 +109,7 @@ class CiderScorer(object):
             :param cnts:
             :return: vec (array of dict), norm (array of float), length (int)
             """
-            vec = [defaultdict(float) for _ in range(self.n)]
+            vec: List[Dict[Tuple[str, ...], float]] = [defaultdict(float) for _ in range(self.n)]
             length = 0
             norm = [0.0 for _ in range(self.n)]
             for (ngram, term_freq) in cnts.items():
@@ -132,10 +124,18 @@ class CiderScorer(object):
 
                 if n == 1:
                     length += term_freq
-            norm = [np.sqrt(n) for n in norm]
+            norm = [float(np.sqrt(n)) for n in norm]
+
             return vec, norm, length
 
-        def sim(vec_hyp, vec_ref, norm_hyp, norm_ref, length_hyp, length_ref):
+        def sim(
+            vec_hyp: List[Dict[Tuple[str, ...], float]],
+            vec_ref: List[Dict[Tuple[str, ...], float]],
+            norm_hyp: List[float],
+            norm_ref: List[float],
+            length_hyp: int,
+            length_ref: int,
+        ) -> np.ndarray:
             """
             Compute the cosine similarity of two vectors.
             :param vec_hyp: array of dictionary for vector corresponding to hypothesis
@@ -164,10 +164,13 @@ class CiderScorer(object):
             return val
 
         # compute log reference length
-        self.ref_len = np.log(float(len(self.crefs)))
+        if self._external_df_file is None:
+            self.ref_len = np.log(float(len(self.crefs)))
 
-        scores = []
+        scores: List[float] = []
         for test, refs in zip(self.ctest, self.crefs):
+            if test is None:
+                continue
             # compute vector for test captions
             vec, norm, length = counts2vec(test)
             # compute vector for ref captions
@@ -182,20 +185,21 @@ class CiderScorer(object):
             # multiply score by 10
             score_avg *= 10.0
             # append score of an image to the score list
-            scores.append(score_avg)
+            scores.append(float(score_avg))
         return scores
 
-    def compute_score(self, option=None, verbose=0):
+    def compute_score(self, option: Any = None, verbose: Any = 0) -> Tuple[float, List[float]]:
         # compute idf
-        self.compute_doc_freq()
+        if self._external_df_file is None:
+            self.compute_doc_freq()
         # assert to check document frequency
         try:
             if len(self.ctest) < max(self.document_frequency.values()):
-                return np.nan, np.array([np.nan for _ in self.ctest])
+                return float(np.nan), np.array([np.nan for _ in self.ctest]).tolist()
         except ValueError:
-            return np.nan, np.array([np.nan for _ in self.ctest])
+            return float(np.nan), np.array([np.nan for _ in self.ctest]).tolist()
         # compute cider score
         score = self.compute_cider()
         # debug
         # print score
-        return np.mean(np.array(score)), np.array(score)
+        return float(np.mean(np.array(score))), np.array(score).tolist()

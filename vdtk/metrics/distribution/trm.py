@@ -1,8 +1,6 @@
-import itertools
 import logging
 import random
-from enum import Enum
-from typing import Any, Dict, Optional, Sequence, Tuple, Type, Union
+from typing import Any, Dict, Optional, Sequence, Type
 
 import numpy as np
 
@@ -15,10 +13,22 @@ class TriangleRankMetricScorer(MetricScorer):
         self,
         distance_function: Type[DistanceFunction],
         num_uk_samples: int = 500,
-        **kwargs,
+        num_null_samples: int = 50,
+        num_workers: Optional[int] = None,
+        log_p: bool = False,
+        maintain_worker_state: bool = True,
+        quiet: bool = False,
+        supersample: bool = False,
     ) -> None:
 
-        super().__init__(**kwargs)
+        super().__init__(
+            num_null_samples,
+            num_workers,
+            log_p,
+            maintain_worker_state,
+            quiet,
+            supersample,
+        )
         self._distance_function = distance_function
         self._num_uk_samples = num_uk_samples
 

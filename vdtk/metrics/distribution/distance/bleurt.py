@@ -12,7 +12,7 @@ from . import DistanceFunction
 class BLEURTDistance(DistanceFunction):
     def __init__(
         self,
-    ):
+    ) -> None:
         if score is None:
             raise ImportError("BLEURT is not installed. Please install it with " "`pip install bleurt`.")
 

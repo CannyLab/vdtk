@@ -1,27 +1,29 @@
 from collections import defaultdict
-from typing import List, Sequence
+from typing import Dict, List, Optional, Sequence, Tuple
 
 import numpy as np
 from rich.progress import track
 
-
-def _dd1():
-    return 0
+NGram = Tuple[Optional[str], ...]
 
 
-def _dd0():
+def _dd1() -> float:
+    return 0.0
+
+
+def _dd0() -> Dict[Optional[str], float]:
     return defaultdict(_dd1)
 
 
-def find_ngrams(input_list, n):
+def find_ngrams(input_list: Sequence[Optional[str]], n: int) -> List[NGram]:
     # Pad the list with None values to the required n
-    input_list = [None] * (n - 1) + input_list + [None] * (n - 1)
-    return zip(*[input_list[i:] for i in range(n)])
+    input_list = [None] * (n - 1) + list(input_list) + [None] * (n - 1)
+    return zip(*[input_list[i:] for i in range(n)])  # type: ignore
 
 
 class NGramLM:
-    def __init__(self, samples: Sequence[Sequence[str]], n: int = 2):
-        self._model = defaultdict(_dd0)
+    def __init__(self, samples: Sequence[Sequence[Optional[str]]], n: int = 2):
+        self._model: Dict[NGram, Dict[Optional[str], float]] = defaultdict(_dd0)
         self._count = 0
         self._n = n
 
@@ -37,11 +39,11 @@ class NGramLM:
                 self._model[gram][w3] /= total_count
 
     @property
-    def count(self):
+    def count(self) -> int:
         return self._count
 
     @property
-    def model(self):
+    def model(self) -> Dict[NGram, Dict[Optional[str], float]]:
         return self._model
 
     def log_likelihood(self, sample: List[str]) -> float:

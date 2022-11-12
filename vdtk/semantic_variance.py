@@ -1,6 +1,5 @@
-import itertools
 import logging
-from typing import Optional
+from typing import Dict, Optional
 
 import click
 import numpy as np
@@ -30,7 +29,7 @@ def semantic_variance(dataset_path: str, split: Optional[str] = None, candidates
     # Compute the semantic variance
     distances = []
     for sample in track(data, description="Computing reference distances", transient=True):
-        sample_distances = {}
+        sample_distances: Dict[str, Dict[str, np.floating]] = {}
         if len((sample.references if not candidates else sample.candidates)) > 2:
             for cp_a, emb_a in zip(
                 (sample.references if not candidates else sample.candidates),
@@ -56,9 +55,9 @@ def semantic_variance(dataset_path: str, split: Optional[str] = None, candidates
     mean_scores = []
     aggregate_scores = []
     variance_scores = []
-    for sample in track(distances, description="Aggregating scores"):
+    for smp in track(distances, description="Aggregating scores"):
         aggregate = []
-        for caption, values in sample.items():
+        for caption, values in smp.items():
             if len(values) > 0:
                 min_scores.append(np.amin(list(values.values())))
                 max_scores.append(np.amax(list(values.values())))
@@ -81,7 +80,7 @@ def semantic_variance(dataset_path: str, split: Optional[str] = None, candidates
     table.add_column("75% Quantile")
     table.add_column("95% Confidence Interval")
 
-    for aggregate in zip(
+    for agg in zip(
         [
             "Minimum Pairwise Distance",
             "Maximum Pairwise Distance",
@@ -90,9 +89,9 @@ def semantic_variance(dataset_path: str, split: Optional[str] = None, candidates
         ],
         [min_scores, max_scores, mean_scores, variance_scores],
     ):
-        _stats = descr(aggregate[1])
+        _stats = descr(agg[1])
         table.add_row(
-            aggregate[0],
+            agg[0],
             f"{_stats['mean']:.2f}",
             f"{_stats['median']:.2f}",
             f"{_stats['min']:.2f}",

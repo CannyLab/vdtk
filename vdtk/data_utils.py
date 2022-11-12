@@ -14,13 +14,13 @@ class _Evaluators:
     _sentence_transformer_model = None
 
     @staticmethod
-    def _spacy_nlp():
+    def _spacy_nlp() -> spacy.language.Language:
         if _Evaluators._spacy_model is None:
             _Evaluators._spacy_model = spacy.load("en_core_web_lg")
         return _Evaluators._spacy_model
 
     @staticmethod
-    def _sentence_transformer():
+    def _sentence_transformer() -> SentenceTransformer:
         if _Evaluators._sentence_transformer_model is None:
             _Evaluators._sentence_transformer_model = SentenceTransformer(
                 "all-mpnet-base-v2",

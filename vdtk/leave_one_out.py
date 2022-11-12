@@ -1,13 +1,11 @@
 import logging
 import random
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import click
-import numpy as np
 from mpire import WorkerPool
 from rich.console import Console
-from rich.progress import (BarColumn, Progress, SpinnerColumn, TextColumn,
-                           TimeElapsedColumn, TimeRemainingColumn, track)
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, TimeRemainingColumn, track
 from rich.table import Table
 
 from vdtk.data_utils import load_dataset
@@ -18,7 +16,7 @@ from vdtk.metrics.rouge.rouge import Rouge
 from vdtk.stats_utils import descr
 
 
-def _loo_worker_init_fn(worker_state):
+def _loo_worker_init_fn(worker_state: Dict[Any, Any]) -> None:
     worker_state["scorers"] = {
         "BLEU": Bleu(4),
         "ROUGE": Rouge(),
@@ -27,7 +25,7 @@ def _loo_worker_init_fn(worker_state):
     }
 
 
-def _loo_worker_fn(worker_state, hypotheses, ground_truths):
+def _loo_worker_fn(worker_state: Any, hypotheses: List[List[str]], ground_truths: List[List[str]]) -> Dict[str, Any]:
     return {
         k: worker_state["scorers"][k].compute_score(ground_truths, hypotheses)
         for k in [
@@ -61,7 +59,7 @@ def leave_one_out(
 
     # Generate the hypothesis datasets
     experiments = []
-    for i in track(range(iterations), description="Generating hypothesis datasets...", transient=True):
+    for _ in track(range(iterations), description="Generating hypothesis datasets...", transient=True):
         s_idx = (random.randint(0, len(c.references) - 1) for c in data)
         hypotheses = [tuple(c.references_tokenized_text[i]) for c, i in zip(data, s_idx)]
         ground_truths = [

@@ -27,7 +27,7 @@ class BERTDistance(DistanceFunction):
     @lru_cache(None)
     def __call__(self, x: str, y: str) -> float:
         assert torch is not None
-        with torch.no_grad():  # type: ignore
+        with torch.no_grad():
             embeddings1 = self._model.encode([x], convert_to_tensor=True, show_progress_bar=False)
             embeddings2 = self._model.encode([y], convert_to_tensor=True, show_progress_bar=False)
             assert isinstance(embeddings1, torch.Tensor)

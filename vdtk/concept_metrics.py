@@ -1,7 +1,7 @@
 import logging
 import os
 from collections import defaultdict
-from typing import Dict, Generator, List, Optional, Tuple
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
 import click
 import numpy as np
@@ -67,12 +67,19 @@ def _compute_overlap(
     return matches, matched_captions
 
 
-def _leave_one_out(data: List[Sample], concept_overlap, concept_set, fuzzy, fuzzy_threshold, candidates):
+def _leave_one_out(
+    data: List[Sample],
+    concept_overlap: Tuple[List[Sample], Dict[str, set]],
+    concept_set: str,
+    fuzzy: bool,
+    fuzzy_threshold: int,
+    candidates: bool,
+) -> List[Dict[str, List[Tuple[float, List[float]]]]]:
     _, matched_concepts = concept_overlap
     logging.info(f"Computing leave-one-out for {concept_set}")
 
     # Construct a function which will be used to initialize the workers
-    def __loo_worker_init_fn(worker_state):
+    def __loo_worker_init_fn(worker_state: Any) -> None:
         worker_state["scorers"] = {
             "BLEU": Bleu(4),
             "ROUGE": Rouge(),
@@ -81,7 +88,7 @@ def _leave_one_out(data: List[Sample], concept_overlap, concept_set, fuzzy, fuzz
         worker_state["matched_concepts"] = matched_concepts
         worker_state["candidates"] = candidates
 
-    def __loo_worker(worker_state, sample):
+    def __loo_worker(worker_state: Any, sample: Sample) -> Dict[str, List[Tuple[float, List[float]]]]:
         # Build the hypothesis set
         hypotheses = set()
         references = set((sample.references if not worker_state["candidates"] else sample.candidates))
@@ -92,11 +99,7 @@ def _leave_one_out(data: List[Sample], concept_overlap, concept_set, fuzzy, fuzz
         # Compute the scores
         scores = {}
         for scorer_name, scorer in worker_state["scorers"].items():
-            # logging.debug(
-            #     f"Computing {scorer_name} for sample {sample._id} ({len(references)} references) ({len(hypotheses)} hyps)"
-            # )
             scores[scorer_name] = [scorer.compute_score({0: list(references)}, {0: [hyp]}) for hyp in hypotheses]
-        # logging.info(f"Computed scores for sample {sample._id}")
         return scores
 
     # Run the leave one out evaluation
@@ -205,7 +208,7 @@ def concept_leave_one_out(
         k: _compute_overlap(data, k, fuzzy=fuzzy, fuzzy_threshold=fuzzy_threshold, candidates=candidates)
         for k in CONCEPT_SETS.keys()
     }
-    leave_one_out = {
+    loo_results = {
         k: _leave_one_out(data, overlaps[k], k, fuzzy, fuzzy_threshold, candidates) for k in CONCEPT_SETS.keys()
     }
 
@@ -222,11 +225,12 @@ def concept_leave_one_out(
     concept_table.add_column("ROUGE-L", justify="right")
     # concept_table.add_column("METEOR", justify="right")
 
-    for concept_set, concept_results in leave_one_out.items():
-        bleu_1_scores = [[s[0][0] for s in r["BLEU"]] for r in concept_results]
-        bleu_2_scores = [[s[0][1] for s in r["BLEU"]] for r in concept_results]
-        bleu_3_scores = [[s[0][2] for s in r["BLEU"]] for r in concept_results]
-        bleu_4_scores = [[s[0][3] for s in r["BLEU"]] for r in concept_results]
+    for concept_set, concept_results in loo_results.items():
+        # Type ignore here since BLEU returns 4 floats, which breaks LITERALLY EVERYTHING
+        bleu_1_scores = [[s[0][0] for s in r["BLEU"]] for r in concept_results]  # type: ignore
+        bleu_2_scores = [[s[0][1] for s in r["BLEU"]] for r in concept_results]  # type: ignore
+        bleu_3_scores = [[s[0][2] for s in r["BLEU"]] for r in concept_results]  # type: ignore
+        bleu_4_scores = [[s[0][3] for s in r["BLEU"]] for r in concept_results]  # type: ignore
         rouge_scores = [[s[0] for s in r["ROUGE"]] for r in concept_results]
         # meteor_scores = [[s[0] for s in r["METEOR"]] for r in concept_results]
 

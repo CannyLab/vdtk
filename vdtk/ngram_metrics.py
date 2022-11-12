@@ -16,7 +16,7 @@ def _compute_evs(model: NGramLM) -> float:
     return 1 - len([i for i in model.model.keys() if len(model.model[i]) <= 1]) / len(model.model)
 
 
-def _compute_ed(ls, evs_2, evs_3, evs_4):
+def _compute_ed(ls: int, evs_2: float, evs_3: float, evs_4: float) -> float:
     if ls == 0:
         return 1
     if ls == 1:

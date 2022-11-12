@@ -1,6 +1,5 @@
-import logging
 import os
-from typing import Any, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import click
 import numpy as np
@@ -14,7 +13,9 @@ from vdtk.score import _handle_baseline_index
 from vdtk.utils.rich import baseline_column
 
 
-def compute_object_roverlap(nlp: Any, query: str, targets: List[str], POS: Tuple[str, ...] = ("NOUN",)) -> float:
+def compute_object_roverlap(
+    nlp: spacy.language.Language, query: str, targets: List[str], POS: Tuple[str, ...] = ("NOUN",)
+) -> float:
     """Compute the object overlap between a query and a list of targets.
 
     Args:
@@ -32,7 +33,9 @@ def compute_object_roverlap(nlp: Any, query: str, targets: List[str], POS: Tuple
     return len(set(query_objects).intersection(set(targets_objects))) / len(set(targets_objects))
 
 
-def compute_object_rdistance(nlp: Any, query: str, targets: List[str], POS: Tuple[str, ...] = ("NOUN",)) -> float:
+def compute_object_rdistance(
+    nlp: spacy.language.Language, query: str, targets: List[str], POS: Tuple[str, ...] = ("NOUN",)
+) -> float:
     """Compute the object overlap between a query and a list of targets.
 
     Args:
@@ -146,17 +149,17 @@ def content_recall(
             for sample in data
         ]
 
-        noun_recall = np.array(noun_recall)
-        verb_recall = np.array(verb_recall)
-        noun_distance = np.array(noun_distance)
-        verb_distance = np.array(verb_distance)
+        noun_recall_a = np.array(noun_recall)
+        verb_recall_a = np.array(verb_recall)
+        noun_distance_a = np.array(noun_distance)
+        verb_distance_a = np.array(verb_distance)
 
         outputs.append(
             (
-                noun_recall,
-                verb_recall,
-                noun_distance,
-                verb_distance,
+                noun_recall_a,
+                verb_recall_a,
+                noun_distance_a,
+                verb_distance_a,
             )
         )
 
@@ -193,9 +196,9 @@ def content_recall(
             else:
                 table.add_row(
                     os.path.basename(ds),
-                    baseline_column(nr_mean, np.mean(outputs[baseline_index][0], axis=-1)),  # type: ignore
-                    baseline_column(vr_mean, np.mean(outputs[baseline_index][1], axis=-1)),  # type: ignore
-                    baseline_column(nd_mean, np.mean(outputs[baseline_index][2], axis=-1)),  # type: ignore
-                    baseline_column(vd_mean, np.mean(outputs[baseline_index][3], axis=-1)),  # type: ignore
+                    baseline_column(nr_mean, np.mean(outputs[baseline_index][0], axis=-1)),
+                    baseline_column(vr_mean, np.mean(outputs[baseline_index][1], axis=-1)),
+                    baseline_column(nd_mean, np.mean(outputs[baseline_index][2], axis=-1)),
+                    baseline_column(vd_mean, np.mean(outputs[baseline_index][3], axis=-1)),
                 )
     rich.print(table)

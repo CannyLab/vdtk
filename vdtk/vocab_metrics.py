@@ -1,6 +1,7 @@
 import logging
 from collections import Counter
-from typing import List, Optional
+from typing import Counter as CounterType
+from typing import List, Optional, Tuple
 
 import click
 import numpy as np
@@ -11,7 +12,7 @@ from rich.table import Table
 from vdtk.data_utils import Sample, load_dataset
 
 
-def _compute_head_tokens(vocab_counts, ratio: float = 0.9):
+def _compute_head_tokens(vocab_counts: CounterType[str], ratio: float = 0.9) -> int:
     counts = 0
     total_tokens = sum(vocab_counts.values())
     for i, (token, count) in enumerate(vocab_counts.most_common()):
@@ -21,17 +22,17 @@ def _compute_head_tokens(vocab_counts, ratio: float = 0.9):
     return len(vocab_counts)
 
 
-def _compute_ws_uniqueness(sample_vocabs):
+def _compute_ws_uniqueness(sample_vocabs: List[CounterType[str]]) -> List[float]:
     # Number of tokens which are unique within a sample
     return [len([i for i in sv.values() if i == 1]) / (len(sv) + 1e-8) for sv in sample_vocabs]
 
 
-def _compute_bs_uniqueness(vocab_counts, sample_vocabs):
+def _compute_bs_uniqueness(vocab_counts: CounterType[str], sample_vocabs: List[CounterType[str]]) -> List[float]:
     # Number of tokens which are unique to only one sample per sample
     return [len([i for i in sv.keys() if vocab_counts[i] == 1]) / (sum(sv.values()) + 1e-8) for sv in sample_vocabs]
 
 
-def _compute_vocab_stats(vocab_counts, sample_vocabs):
+def _compute_vocab_stats(vocab_counts: CounterType[str], sample_vocabs: List[CounterType[str]]) -> Table:
     unique_tokens = len(vocab_counts)
     total_tokens = sum(vocab_counts.values())
     head_tokens = _compute_head_tokens(vocab_counts)
@@ -56,7 +57,12 @@ def _compute_vocab_stats(vocab_counts, sample_vocabs):
     return vocab_stats_table
 
 
-def _compute_pos_stats(noun_counts, verb_counts, sample_noun_counts, sample_verb_counts):
+def _compute_pos_stats(
+    noun_counts: CounterType[str],
+    verb_counts: CounterType[str],
+    sample_noun_counts: List[CounterType[str]],
+    sample_verb_counts: List[CounterType[str]],
+) -> Table:
     pos_stats_table = Table(title="POS Base Statistics", title_justify="left")
 
     unique_nouns = len(noun_counts)
@@ -96,11 +102,13 @@ def _compute_pos_stats(noun_counts, verb_counts, sample_noun_counts, sample_verb
     return pos_stats_table
 
 
-def _count_nouns_and_verbs(data, candidates):
-    noun_counts = Counter()
-    verb_counts = Counter()
-    sample_noun_counts = []
-    sample_verb_counts = []
+def _count_nouns_and_verbs(
+    data: List[Sample], candidates: bool
+) -> Tuple[CounterType[str], CounterType[str], List[CounterType[str]], List[CounterType[str]]]:
+    noun_counts: CounterType[str] = Counter()
+    verb_counts: CounterType[str] = Counter()
+    sample_noun_counts: List[CounterType[str]] = []
+    sample_verb_counts: List[CounterType[str]] = []
     for sample in track(data, transient=True, description="Counting Nouns and Verbs"):
         sample_noun_counts.append(Counter())
         sample_verb_counts.append(Counter())
@@ -115,11 +123,11 @@ def _count_nouns_and_verbs(data, candidates):
     return noun_counts, verb_counts, sample_noun_counts, sample_verb_counts
 
 
-def _count_tokens(data: List[Sample], candidates):
-    vocab_counts = Counter()
+def _count_tokens(data: List[Sample], candidates: bool) -> Tuple[CounterType[str], List[CounterType[str]]]:
+    vocab_counts: CounterType[str] = Counter()
     sample_vocabs = []
     for sample in track(data, transient=True, description="Counting Tokens"):
-        sample_vocab = Counter()
+        sample_vocab: CounterType[str] = Counter()
         for reference in sample.references_tokenized_text if not candidates else sample.candidates_tokenized_text:
             vocab_counts.update(reference)
             sample_vocab.update(reference)
