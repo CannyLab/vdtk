@@ -1,11 +1,19 @@
+import pytest
+
+
+@pytest.mark.skip(reason="Long running test -- run manually")
 def test_coco_score_consistency() -> None:
     import os
 
     import numpy as np
-    from pycocoevalcap.eval import COCOEvalCap
-    from pycocotools.coco import COCO
 
-    from vdtk.score import _bleu, _ciderd
+    try:
+        from pycocoevalcap.eval import COCOEvalCap
+        from pycocotools.coco import COCO
+    except ImportError:
+        pytest.skip("pycocoevalcap not installed")
+
+    from vdtk.score import _bleu, _ciderd, _meteor, _rouge, _spice
 
     # Get the pycocoevalcap scores
 
@@ -31,13 +39,19 @@ def test_coco_score_consistency() -> None:
 
     # Get the vdtk scores
     vdtk_cider_scores = _ciderd([dataset_file], None)
-    np.testing.assert_almost_equal(coco_eval.eval["CIDEr"], vdtk_cider_scores[0][0], decimal=3)
-
+    vdtk_meteor_scores = _meteor([dataset_file], None)
     vdtk_bleu_scores = _bleu([dataset_file], None)
+    vdtk_rouge_scores = _rouge([dataset_file], None)
+    vdtk_spice_scores = _spice([dataset_file], None)
+
+    np.testing.assert_almost_equal(coco_eval.eval["CIDEr"], vdtk_cider_scores[0][0], decimal=3)
     np.testing.assert_almost_equal(coco_eval.eval["Bleu_1"], vdtk_bleu_scores[0][0][0], decimal=3)
     np.testing.assert_almost_equal(coco_eval.eval["Bleu_2"], vdtk_bleu_scores[0][0][1], decimal=3)
     np.testing.assert_almost_equal(coco_eval.eval["Bleu_3"], vdtk_bleu_scores[0][0][2], decimal=3)
     np.testing.assert_almost_equal(coco_eval.eval["Bleu_4"], vdtk_bleu_scores[0][0][3], decimal=3)
+    np.testing.assert_almost_equal(coco_eval.eval["METEOR"], vdtk_meteor_scores[0][0], decimal=3)
+    np.testing.assert_almost_equal(coco_eval.eval["ROUGE_L"], vdtk_rouge_scores[0][0], decimal=3)
+    np.testing.assert_almost_equal(coco_eval.eval["SPICE"], vdtk_spice_scores[0][0], decimal=3)
 
 
 if __name__ == "__main__":

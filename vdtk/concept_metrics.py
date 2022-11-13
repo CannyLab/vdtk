@@ -131,7 +131,7 @@ def _leave_one_out(
 @click.command()
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
-@click.option("--fuzzy", default=False, type=bool, help="Use fuzzy matching")
+@click.option("--fuzzy", default=False, is_flag=True, type=bool, help="Use fuzzy matching")
 @click.option("--fuzzy-threshold", default=90, type=click.IntRange(0, 100), help="Fuzzy matching threshold")
 @click.option("--candidates", default=False, is_flag=True, help="Evaluate candidates instead of references")
 def concept_overlap(
@@ -185,7 +185,7 @@ def concept_overlap(
 @click.command()
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
-@click.option("--fuzzy", default=False, type=bool, help="Use fuzzy matching")
+@click.option("--fuzzy", default=False, is_flag=True, type=bool, help="Use fuzzy matching")
 @click.option("--fuzzy-threshold", default=90, type=click.IntRange(0, 100), help="Fuzzy matching threshold")
 @click.option("--candidates", default=False, is_flag=True, help="Evaluate candidates instead of references")
 def concept_leave_one_out(

@@ -27,7 +27,7 @@ class Spice:
     def float_convert(self, obj: Any) -> float:
         try:
             return float(obj)
-        except ValueError:
+        except (ValueError, TypeError):
             return np.nan
 
     def compute_score(

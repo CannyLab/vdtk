@@ -1,4 +1,5 @@
 import json
+import os
 
 with open("/home/davidchan/Projects/vdtk/vdtk-test/test_assets/captions_val2014.json", "r") as jf:
     data = json.load(jf)
@@ -26,6 +27,15 @@ for elem in data["annotations"]:
     if elem["image_id"] in dataset:
         dataset[elem["image_id"]]["references"].append(elem["caption"])
 
+ds = []
+for sample in list(dataset.values()):
+    if os.path.exists(
+        os.path.join("/home/davidchan/Projects/vdtk/vdtk-test/test_assets/coco_test_images", sample["media_path"])
+    ):
+        ds.append(sample)
+
+ds = ds[:10]
+
 # Write the dataset
-with open("/home/davidchan/Projects/vdtk/vdtk-test/test_assets/captions_val2014_fakecap_dataset.json", "w") as jf:
-    json.dump(list(dataset.values()), jf)
+with open("/home/davidchan/Projects/vdtk/vdtk-test/test_assets/dataset_small.json", "w") as jf:
+    json.dump(ds, jf)

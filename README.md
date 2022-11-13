@@ -1,4 +1,4 @@
-# vdtk: Visual Description Data Evaluation Tools
+# vdtk: Visual Description Evaluation Tools
 
 This tool is designed to allow for a deep investigation of diversity in visual description datasets, and to help users
 understand their data at a token, n-gram, description, and dataset level.

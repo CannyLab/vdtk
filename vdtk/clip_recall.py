@@ -73,7 +73,7 @@ def _add_table_row(
 ) -> None:
     (rank, rrank, recall_1, recall_5, recall_max) = scores
 
-    if i is None:
+    if i is None or baseline_index is None:
         table.add_row(
             name,
             f"{np.mean(rank):.4f} ± {np.std(rank):.4f}",
@@ -112,7 +112,7 @@ def _add_table_row(
 @click.command()
 @click.argument("dataset_paths", type=str, nargs=-1)
 @click.option("--split", default=None, type=str, help="Split to evaluate")
-@click.option("--media_root", default=None, type=str, help="Root directory for media")
+@click.option("--media-root", default=None, type=str, help="Root directory for media")
 def clip_recall(
     dataset_paths: List[str],
     split: Optional[str] = None,
@@ -178,7 +178,7 @@ def clip_recall(
         )
 
     # Print the results
-    table = Table(title="CLIP Recall")
+    table = Table(title=f"CLIP Recall")
     table.add_column("Dataset", justify="left", style="cyan", no_wrap=True)
     table.add_column("Mean Rank", justify="right", style="magenta")
     table.add_column("Mean Reciprocal Rank", justify="right", style="magenta")

@@ -1,19 +1,25 @@
 import itertools
 import json
 import os
+import warnings
 from typing import Any, Callable, List, Optional, Sequence, Tuple, Type, Union
 
 import click
-import mauve
 import numpy as np
 import rich
 import torch
 from bert_score import BERTScorer
 
+with warnings.catch_warnings():
+    # Ignore the warnings about AVX512 missing on Mauve
+    warnings.simplefilter("ignore")
+    import mauve
+
 try:
     from bleurt import score as bleurt_score
 except ImportError:
     bleurt_score = None
+
 from rich.progress import track
 from rich.table import Table
 
