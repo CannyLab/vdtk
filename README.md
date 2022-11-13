@@ -40,23 +40,23 @@ available for use:
 
 | Command | Details |
 | ----------- | ----------- |
-| vocab-stats | Run with `vdtk-cli vocab-stats DATASET_JSON_PATH`. Compute basic token-level vocab statistics |
-| ngram-stats | Run with `vdtk-cli ngram-stats DATASET_JSON_PATH`. Compute n-gram statistics, EVS@N and ED@N  |
-| caption-stats | Run with `vdtk-cli caption-stats DATASET_JSON_PATH`. Compute caption-level dataset statistics  |
-| semantic-variance | Run with `vdtk-cli semantic-variance DATASET_JSON_PATH`. Compute within-sample BERT embedding semantic variance |
-| coreset | Run with `vdtk-cli coreset DATASET_JSON_PATH`. Compute the caption coreset from the training split needed to solve the validation split |
-| concept-overlap | Run with `vdtk-cli concept-overlap DATASET_JSON_PATH`. Compute the concept overlap between popular feature extractors, and the dataset |
-| concept-leave-one-out | Run with `vdtk-cli concept-leave-one-out DATASET_JSON_PATH`. Compute the performance with a coreset of concept captions |
-| leave-one-out | Run with `vdtk-cli leave-one-out DATASET_JSON_PATH`. Compute leave-one-out ground truth performance on a dataset with multiple ground truths |
+| vocab-stats | Run with `vdtk vocab-stats DATASET_JSON_PATH`. Compute basic token-level vocab statistics |
+| ngram-stats | Run with `vdtk ngram-stats DATASET_JSON_PATH`. Compute n-gram statistics, EVS@N and ED@N  |
+| caption-stats | Run with `vdtk caption-stats DATASET_JSON_PATH`. Compute caption-level dataset statistics  |
+| semantic-variance | Run with `vdtk semantic-variance DATASET_JSON_PATH`. Compute within-sample BERT embedding semantic variance |
+| coreset | Run with `vdtk coreset DATASET_JSON_PATH`. Compute the caption coreset from the training split needed to solve the validation split |
+| concept-overlap | Run with `vdtk concept-overlap DATASET_JSON_PATH`. Compute the concept overlap between popular feature extractors, and the dataset |
+| concept-leave-one-out | Run with `vdtk concept-leave-one-out DATASET_JSON_PATH`. Compute the performance with a coreset of concept captions |
+| leave-one-out | Run with `vdtk leave-one-out DATASET_JSON_PATH`. Compute leave-one-out ground truth performance on a dataset with multiple ground truths |
 
 Additionally, several commands take multiple dataset JSONs, which can be used to compare different runs, or different datasets. Appending (:baseline) to any
-of the JSON file paths will treat this run as a baseline, and compute relative values and coloring accordingly (example: `vdtk-cli score cider-d ./baseline.json:baseline ./model.json`).
+of the JSON file paths will treat this run as a baseline, and compute relative values and coloring accordingly (example: `vdtk score cider-d ./baseline.json:baseline ./model.json`).
 
 | Command | Details |
 | ----------- | ----------- |
-| score | Run with `vdtk-cli score [metric] DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute BLEU/METEOR/CIDEr-D/ROUGE/BERTScore/MAUVE/etc. Guaranteed to be consistent with the COCO captioning tools (for use externally). |
-| clip-recall | Run with `vdtk-cli clip-recall DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute the MRR, and Recall@K values for candidate/reference captions based on the CLIP model. |
-| content-recall | Run with `vdtk-cli content-recall DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute Noun/Verb recall for the candidates against the references. |
+| score | Run with `vdtk score [metric] DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute BLEU/METEOR/CIDEr-D/ROUGE/BERTScore/MAUVE/etc. Guaranteed to be consistent with the COCO captioning tools (for use externally). |
+| clip-recall | Run with `vdtk clip-recall DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute the MRR, and Recall@K values for candidate/reference captions based on the CLIP model. |
+| content-recall | Run with `vdtk content-recall DATASET_JSON_PATH_1, DATASET_JSON_PATH_2...`. Compute Noun/Verb recall for the candidates against the references. |
 
 For more details and options, see the `--help` command for any of the commands above. Note that some tools are relatively
 compute intensive. This toolkit will make use of a GPU if available and necessary, as well as a large number of CPU cores
