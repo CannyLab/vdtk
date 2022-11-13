@@ -1,7 +1,5 @@
-import glob
 import os
 
-import pytest
 from click.testing import CliRunner
 
 from vdtk.concept_metrics import concept_leave_one_out, concept_overlap
