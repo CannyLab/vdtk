@@ -1,0 +1,6 @@
+[submodule "vdtk/third_party/clip"]
+	path = vdtk/third_party/clip
+	url = https://github.com/openai/CLIP
+[submodule "vdtk/third_party/bleurt"]
+	path = vdtk/third_party/bleurt
+	url = https://github.com/google-research/bleurt.git

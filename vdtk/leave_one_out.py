@@ -1,12 +1,12 @@
 import logging
 import random
-from typing import Optional
+from typing import Any, Dict, List, Optional
 
 import click
-import numpy as np
-import rich
 from mpire import WorkerPool
-from rich.progress import track
+from rich.console import Console
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, TimeRemainingColumn, track
+from rich.table import Table
 
 from vdtk.data_utils import load_dataset
 from vdtk.metrics.bleu.bleu import Bleu
@@ -16,7 +16,7 @@ from vdtk.metrics.rouge.rouge import Rouge
 from vdtk.stats_utils import descr
 
 
-def _loo_worker_init_fn(worker_state):
+def _loo_worker_init_fn(worker_state: Dict[Any, Any]) -> None:
     worker_state["scorers"] = {
         "BLEU": Bleu(4),
         "ROUGE": Rouge(),
@@ -25,7 +25,7 @@ def _loo_worker_init_fn(worker_state):
     }
 
 
-def _loo_worker_fn(worker_state, hypotheses, ground_truths):
+def _loo_worker_fn(worker_state: Any, hypotheses: List[List[str]], ground_truths: List[List[str]]) -> Dict[str, Any]:
     return {
         k: worker_state["scorers"][k].compute_score(ground_truths, hypotheses)
         for k in [
@@ -43,7 +43,10 @@ def _loo_worker_fn(worker_state, hypotheses, ground_truths):
 @click.option("--iterations", default=750, type=click.IntRange(min=1), help="Number of iterations to run")
 @click.option("--max-gt-size", default=None, type=int, help="Maximum number of ground truth sentences to use")
 def leave_one_out(
-    dataset_path: str, split: Optional[str] = None, iterations: int = 750, max_gt_size: Optional[int] = None
+    dataset_path: str,
+    split: Optional[str] = None,
+    iterations: int = 750,
+    max_gt_size: Optional[int] = None,
 ) -> None:
 
     logging.info("Loading dataset...")
@@ -56,7 +59,7 @@ def leave_one_out(
 
     # Generate the hypothesis datasets
     experiments = []
-    for i in track(range(iterations), description="Generating hypothesis datasets...", transient=True):
+    for _ in track(range(iterations), description="Generating hypothesis datasets...", transient=True):
         s_idx = (random.randint(0, len(c.references) - 1) for c in data)
         hypotheses = [tuple(c.references_tokenized_text[i]) for c, i in zip(data, s_idx)]
         ground_truths = [
@@ -77,15 +80,15 @@ def leave_one_out(
 
         # Setup the progress bar
         progress_columns = [
-            rich.progress.SpinnerColumn(),
-            rich.progress.TextColumn("[progress.description]{task.description}"),
-            rich.progress.BarColumn(),
-            rich.progress.TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            rich.progress.TimeElapsedColumn(),
-            rich.progress.TimeRemainingColumn(),
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TimeElapsedColumn(),
+            TimeRemainingColumn(),
         ]
 
-        with rich.progress.Progress(*progress_columns, transient=True) as progress:
+        with Progress(*progress_columns, transient=True) as progress:
             for result in progress.track(
                 pool.imap_unordered(_loo_worker_fn, experiments, worker_init=_loo_worker_init_fn),
                 description="Evaluating...",
@@ -104,9 +107,7 @@ def leave_one_out(
         "METEOR": descr([r["METEOR"][0] for r in experimental_results]),
     }
 
-    metrics_table = rich.table.Table(
-        title=f"Leave One Out Metric Scores ({iterations} Iterations)", title_justify="left"
-    )
+    metrics_table = Table(title=f"Leave One Out Metric Scores ({iterations} Iterations)", title_justify="left")
     metrics_table.add_column("Metric", justify="left")
     metrics_table.add_column("Mean")
     metrics_table.add_column("Median")
@@ -126,13 +127,13 @@ def leave_one_out(
                 f"{value['min']:.2f}",
                 f"{value['max']:.2f}",
                 f"{value['stddev']:.2f}",
-                f"{value['25q']:.2f}",
-                f"{value['75q']:.2f}",
+                f"{value['q25']:.2f}",
+                f"{value['q75']:.2f}",
                 f"{value['s95ci'][0]:.2f} - {value['s95ci'][1]:.2f}",
             ],
         )
 
     # Print the results
-    console = rich.console.Console()
+    console = Console()
     console.print()
     console.print(metrics_table)

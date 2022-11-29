@@ -6,6 +6,7 @@ import click
 import numpy as np
 import rich
 from rich.progress import track
+from rich.table import Table
 
 from vdtk.data_utils import load_dataset
 from vdtk.stats_utils import descr
@@ -14,7 +15,8 @@ from vdtk.stats_utils import descr
 @click.command()
 @click.argument("dataset_path", type=click.Path(exists=True))
 @click.option("--split", default=None, type=str, help="Split to evaluate")
-def caption_stats(dataset_path: str, split: Optional[str] = None) -> None:
+@click.option("--candidates", default=False, is_flag=True, help="Evaluate candidates instead of references")
+def caption_stats(dataset_path: str, split: Optional[str] = None, candidates: bool = False) -> None:
 
     logging.info("Loading dataset...")
     data = load_dataset(dataset_path)
@@ -28,7 +30,10 @@ def caption_stats(dataset_path: str, split: Optional[str] = None) -> None:
             list(
                 itertools.chain.from_iterable(
                     [
-                        [len(c) for c in s.references_tokenized_lemma]
+                        [
+                            len(c)
+                            for c in (s.references_tokenized_lemma if not candidates else s.candidates_tokenized_lemma)
+                        ]
                         for s in track(data, description="Tokenizing dataset...", transient=True)
                     ]
                 )
@@ -36,14 +41,14 @@ def caption_stats(dataset_path: str, split: Optional[str] = None) -> None:
         )
     )
     unique_captions = [
-        set(tuple(c) for c in s.references_tokenized_lemma)
+        set(tuple(c) for c in (s.references_tokenized_lemma if not candidates else s.candidates_tokenized_lemma))
         for s in track(data, description="Tokenizing dataset...", transient=True)
     ]
     captions_per_video = descr([len(s.references) for s in data if s.references])
     unique_captions_per_video = descr([len(u) for u in unique_captions if len(u) > 0])
 
     # Display the table
-    table = rich.table.Table(title="Caption Metrics", title_justify="left")
+    table = Table(title="Caption Metrics", title_justify="left")
     table.add_column("Metric")
     table.add_column("Mean")
     table.add_column("Median")
@@ -62,8 +67,8 @@ def caption_stats(dataset_path: str, split: Optional[str] = None) -> None:
         f"{tokens_per_caption['min']:.2f}",
         f"{tokens_per_caption['max']:.2f}",
         f"{tokens_per_caption['stddev']:.2f}",
-        f"{tokens_per_caption['25q']:.2f}",
-        f"{tokens_per_caption['75q']:.2f}",
+        f"{tokens_per_caption['q25']:.2f}",
+        f"{tokens_per_caption['q75']:.2f}",
         f"{tokens_per_caption['s95ci'][0]:.2f} - {tokens_per_caption['s95ci'][1]:.2f}",
     )
     table.add_row(
@@ -73,8 +78,8 @@ def caption_stats(dataset_path: str, split: Optional[str] = None) -> None:
         f"{captions_per_video['min']:.2f}",
         f"{captions_per_video['max']:.2f}",
         f"{captions_per_video['stddev']:.2f}",
-        f"{captions_per_video['25q']:.2f}",
-        f"{captions_per_video['75q']:.2f}",
+        f"{captions_per_video['q25']:.2f}",
+        f"{captions_per_video['q75']:.2f}",
         f"{captions_per_video['s95ci'][0]:.2f} - {captions_per_video['s95ci'][1]:.2f}",
     )
     table.add_row(
@@ -84,8 +89,8 @@ def caption_stats(dataset_path: str, split: Optional[str] = None) -> None:
         f"{unique_captions_per_video['min']:.2f}",
         f"{unique_captions_per_video['max']:.2f}",
         f"{unique_captions_per_video['stddev']:.2f}",
-        f"{unique_captions_per_video['25q']:.2f}",
-        f"{unique_captions_per_video['75q']:.2f}",
+        f"{unique_captions_per_video['q25']:.2f}",
+        f"{unique_captions_per_video['q75']:.2f}",
         f"{unique_captions_per_video['s95ci'][0]:.2f} - {unique_captions_per_video['s95ci'][1]:.2f}",
     )
 

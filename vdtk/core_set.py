@@ -1,25 +1,26 @@
 import itertools
 import logging
-import time
+from typing import Callable, Dict, List, Set, TypeVar
 
 import click
-import nltk
 import numpy as np
 import rich
 from mpire import WorkerPool
+from nltk.translate.bleu_score import sentence_bleu
+from nltk.translate.meteor_score import meteor_score
 from rich.progress import track
 
 from vdtk.data_utils import load_dataset
 
-METRIC_FUNCTIONS = {
-    "BLEU": lambda x, y: nltk.translate.bleu_score.sentence_bleu(y, x),
-    "METEOR": lambda x, y: nltk.translate.meteor_score.meteor_score(y, x),
+METRIC_FUNCTIONS: Dict[str, Callable[[List[str], List[List[str]]], float]] = {
+    "BLEU": lambda x, y: sentence_bleu(y, x),
+    "METEOR": lambda x, y: meteor_score(y, x),
 }
 
 
-def _greedy_max_coverage(s):
+def _greedy_max_coverage(s: List[Set]) -> List[int]:
     target_coverage = set(list(itertools.chain.from_iterable(s)))
-    covered = set()
+    covered: Set = set()
     cover = []
     last_coverage_len = 0
     with rich.progress.Progress(transient=True) as progress:
@@ -72,7 +73,7 @@ def coreset(dataset_path: str, train_split: str, test_split: str, metric: str = 
 
     _metric_func = METRIC_FUNCTIONS[metric]
 
-    def _test_caption(hypothesis):
+    def _test_caption(hypothesis: List[str]) -> List[float]:
         scores = []
         for s in validation_samples:
             scores.append(_metric_func(hypothesis, s))

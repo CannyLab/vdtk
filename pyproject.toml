@@ -1,55 +1,122 @@
-[tool.poetry]
+[project]
 name = "vdtk"
-version = "0.2.0"
-description = ""
-authors = ["DavidMChan <davidchan@berkeley.edu>"]
-readme = "README.md"
-include = ["README.md", "LICENSE", "vdtk/assets/*.txt"]
-homepage = "https://github.com/CannyLab/vdtk"
-repository = "https://github.com/CannyLab/vdtk"
+description = "Visual Description Evaluation Toolkit"
+dynamic = ["version", "readme"]
+license = {text = "MIT"}
+authors = [
+    { name = "David Chan", email = "davidchan@berkeley.edu" }
+]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
-    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Scientific/Engineering :: Information Analysis"
+]
+dependencies = [
+    "nltk >= 3.6.5",
+    "numpy >= 1.21.4",
+    "matplotlib >= 3.5.0",
+    "tqdm >= 4.62.3",
+    "spacy >= 3.2.0",
+    "fuzzywuzzy >= 0.18.0",
+    "rich >= 10.14.0",
+    "mpire >= 2.3.1",
+    "click >= 8.0.3",
+    "fuzzysearch >= 0.7.3",
+    "sentence-transformers >= 2.1.0",
+    "bert-score >= 0.3.12",
+    "embeddings >= 0.0.8",
+    "POT >= 0.8",
+    "rouge-score >= 0.1.2",
+    "jdk4py >= 17.0.3.0",
+    "mauve-text >= 0.3.0",
+    "ftfy >= 6.1.1",
+    "regex >= 2022.10.31",
 ]
 
-[tool.poetry.dependencies]
-python = "~3.8"
-nltk = "^3.6.5"
-numpy = "^1.21.4"
-matplotlib = "^3.5.0"
-tqdm = "^4.62.3"
-spacy = "^3.2.0"
-textdistance = "^4.2.2"
-fuzzywuzzy = "^0.18.0"
-absl-py = "^1.0.0"
-python-Levenshtein = "^0.12.2"
-rich = "^10.14.0"
-msgpack = "^1.0.2"
-mpire = "^2.3.1"
-click = "^8.0.3"
-# Removed for now because we can't upload this to pypi
-# en-core-web-lg = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.2.0/en_core_web_lg-3.2.0-py3-none-any.whl"}
-fuzzysearch = "^0.7.3"
-sentence-transformers = "^2.1.0"
+[project.optional-dependencies]
+dev = ["pytest", "mypy", "black", "flake8", "flake8-black", "isort", "pytest-xdist"]
+all = [
+    "pytest",
+    "mypy",
+    "black",
+    "flake8",
+    "flake8-black",
+    "isort",
+    "tensorflow >= 2.11.0",
+    "tf-slim >= 1.1.0",
+    "sentencepiece >= 0.1.97",
+    "pandas >= 1.5.1",
+    "scipy >= 1.9.3",
+]
 
-[tool.poetry.dev-dependencies]
-ipdb = "^0.13.9"
-ipython = "^7.29.0"
-isort = "^5.10.1"
-black = "^21.11-beta.1"
-flake8 = "^4.0.1"
-mypy = "^0.910"
+[project.scripts]
+vdtk = "vdtk.cli:cli"
 
-[tool.poetry.scripts]
-vdtk-cli = 'vdtk.cli:cli'
+
+[tool.setuptools.dynamic]
+version =  {attr = "vdtk.__version__"}
+readme = {file = ["README.md", "LICENSE"]}
+
+[tool.setuptools.packages]
+find = {}
+
+[tool.setuptools.package-data]
+vdtk = ["*.gz"] # For CLIP vocab files
+
+
+[tool.setuptools]
+include-package-data = true
+license-files = ["*LICEN[CS]E*", "*COPYING*", "*NOTICE*", "*AUTHORS*"]
+
+[tool.mypy]
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+disallow_untyped_calls = true
+no_implicit_optional = true
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 120
+target_version =['py38']
+exclude = '''
+
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )
+)
+'''
+
+[tool.isort]
+sections="FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra"
+testpaths = [
+    "vdtk-test",
+]
