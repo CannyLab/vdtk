@@ -65,7 +65,7 @@ vdtk = "vdtk.cli:cli"
 
 [tool.setuptools.dynamic]
 version =  {attr = "vdtk.__version__"}
-readme = {file = ["README.md", "LICENSE"]}
+readme = {file = ["README.md", "LICENSE"], content-type = "text/markdown"}
 
 [tool.setuptools.packages]
 find = {}
