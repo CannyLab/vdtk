@@ -39,8 +39,7 @@ dependencies = [
     "rouge-score >= 0.1.2",
     "jdk4py >= 17.0.3.0",
     "clip @ git+https://github.com/openai/CLIP.git",
-    "mauve-text @ git+https://github.com/krishnap25/mauve.git",
-    "en_core_web_lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.4.1/en_core_web_lg-3.4.1-py3-none-any.whl",
+    "mauve-text >= 0.3.0",
 ]
 
 [project.optional-dependencies]

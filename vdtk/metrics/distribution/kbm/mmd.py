@@ -157,7 +157,7 @@ class MMDFastTextMetricScorer(MMDBaseMetricScorer):
 class MMDCLIPMetricScorer(MMDBaseMetricScorer):
     def _initialize_worker_state(self) -> Dict[str, Any]:
         # Initialize the models
-        device = "cuda" if torch.cuda.is_available() else "cpu"
+        device = "cuda:0" if torch.cuda.is_available() else "cpu"
         model, preprocess = clip.load("ViT-B/32", device=device)
 
         @lru_cache(None)

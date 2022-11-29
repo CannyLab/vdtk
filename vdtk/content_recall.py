@@ -10,6 +10,7 @@ from rich.table import Table
 
 from vdtk.data_utils import load_dataset
 from vdtk.score import _handle_baseline_index
+from vdtk.utils.nlp import get_or_download_spacy_model
 from vdtk.utils.rich import baseline_column
 
 
@@ -84,7 +85,7 @@ def content_recall(
 
     # Get the baseline
     baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
-    _nlp = spacy.load("en_core_web_lg")
+    _nlp = get_or_download_spacy_model("en_core_web_lg")
 
     outputs = []
     for ds in track(dataset_paths, transient=True, description="Computing content recall..."):

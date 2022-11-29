@@ -7,6 +7,8 @@ import numpy as np
 import spacy
 from sentence_transformers import SentenceTransformer
 
+from vdtk.utils.nlp import get_or_download_spacy_model
+
 
 class _Evaluators:
 
@@ -16,7 +18,7 @@ class _Evaluators:
     @staticmethod
     def _spacy_nlp() -> spacy.language.Language:
         if _Evaluators._spacy_model is None:
-            _Evaluators._spacy_model = spacy.load("en_core_web_lg")
+            _Evaluators._spacy_model = get_or_download_spacy_model("en_core_web_lg")
         return _Evaluators._spacy_model
 
     @staticmethod
