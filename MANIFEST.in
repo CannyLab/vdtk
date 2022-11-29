@@ -1,1 +1,4 @@
 include vdtk/third_party/clip/clip/bpe_simple_vocab_16e6.txt.gz
+include vdtk/third_party/bleurt/LICENSE
+recursive-include vdtk/third_party/bleurt/bleurt/test_checkpoint *
+recursive-exclude vdtk-test/ *
