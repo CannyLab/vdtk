@@ -1,12 +1,14 @@
 import os
 from functools import lru_cache
 
-try:
-    from bleurt import score
-except ImportError:
-    score = None
+# try:
+from vdtk.third_party.bleurt.bleurt import score
 
 from . import DistanceFunction
+
+# except ImportError:
+#     score = None
+
 
 
 class BLEURTDistance(DistanceFunction):

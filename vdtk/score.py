@@ -16,7 +16,7 @@ with warnings.catch_warnings():
     import mauve
 
 try:
-    from bleurt import score as bleurt_score
+    from vdtk.third_party.bleurt.bleurt import score as bleurt_score
 except ImportError as e:
     bleurt_score = None
 
@@ -26,17 +26,24 @@ from rich.table import Table
 # from vdtk.metrics.bleu.bleu import Bleu
 from vdtk.metrics.bleu.bleu import Bleu
 from vdtk.metrics.cider.cider import CiderBase as Cider
-from vdtk.metrics.distribution import (MetricScorer, MMDBertMetricScorer,
-                                       MMDCLIPMetricScorer,
-                                       MMDFastTextMetricScorer,
-                                       MMDGloveMetricScorer,
-                                       TriangleRankMetricScorer)
-from vdtk.metrics.distribution.distance import (BERTDistance,
-                                                BERTScoreDistance,
-                                                BLEU4Distance, BLEURTDistance,
-                                                CIDERDDistance,
-                                                DistanceFunction,
-                                                MeteorDistance, ROUGELDistance)
+from vdtk.metrics.distribution import (
+    MetricScorer,
+    MMDBertMetricScorer,
+    MMDCLIPMetricScorer,
+    MMDFastTextMetricScorer,
+    MMDGloveMetricScorer,
+    TriangleRankMetricScorer,
+)
+from vdtk.metrics.distribution.distance import (
+    BERTDistance,
+    BERTScoreDistance,
+    BLEU4Distance,
+    BLEURTDistance,
+    CIDERDDistance,
+    DistanceFunction,
+    MeteorDistance,
+    ROUGELDistance,
+)
 from vdtk.metrics.meteor.meteor import MeteorBase as Meteor
 from vdtk.metrics.rouge.rouge import RougeBase as Rouge
 from vdtk.metrics.spice.spice import Spice
@@ -455,7 +462,9 @@ def _simple_function_builder(
 def _trm_function_builder(
     distance_function: Type[DistanceFunction], function_name: str, string: str
 ) -> Tuple[Callable[[List[str], Optional[str], bool, int], None], click.Command]:
-    def _metric_function(dataset_paths: List[str], split: Optional[str], supersample: bool, num_uk_samples: int = 500) -> None:
+    def _metric_function(
+        dataset_paths: List[str], split: Optional[str], supersample: bool, num_uk_samples: int = 500
+    ) -> None:
         baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
         scorer = TriangleRankMetricScorer(
             distance_function=distance_function,
@@ -493,7 +502,9 @@ def _trm_function_builder(
 def _mmd_function_builder(
     metric_scorer_class: MMDMetricScorer, function_name: str, string: str
 ) -> Tuple[Callable[[List[str], Optional[str], bool, Optional[float]], None], click.Command]:
-    def _metric_function(dataset_paths: List[str], split: Optional[str], supersample: bool, mmd_sigma: Optional[float]) -> None:
+    def _metric_function(
+        dataset_paths: List[str], split: Optional[str], supersample: bool, mmd_sigma: Optional[float]
+    ) -> None:
         baseline_index, dataset_paths = _handle_baseline_index(dataset_paths)
         scorer = metric_scorer_class(
             mmd_sigma if mmd_sigma is not None else "median", num_null_samples=0, supersample=supersample

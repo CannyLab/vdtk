@@ -45,9 +45,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest", "mypy", "black", "flake8", "flake8-black", "isort", "pytest-xdist"]
-bleurt = [
-    "bleurt @ git+https://github.com/google-research/bleurt.git",
-]
 all = [
     "pytest",
     "mypy",
@@ -55,7 +52,11 @@ all = [
     "flake8",
     "flake8-black",
     "isort",
-    "bleurt @ git+https://github.com/google-research/bleurt.git",
+    "tensorflow >= 2.11.0",
+    "tf-slim >= 1.1.0",
+    "sentencepiece >= 0.1.97",
+    "pandas >= 1.5.1",
+    "scipy >= 1.9.3",
 ]
 
 [project.scripts]
