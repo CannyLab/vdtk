@@ -9,7 +9,7 @@ from vdtk.clip_recall import clip_recall
 
 def test_clip_recall() -> None:
 
-    if len(list(glob.glob("vdtk-test/test_assets/coco_test_images/*.jpg"))) < 1:
+    if len(list(glob.glob(os.path.join(os.path.dirname(__file__), "test_assets", "coco_test_images/*.jpg")))) < 1:
         pytest.skip("COCO Test Images not downloaded...")
 
     runner = CliRunner()

@@ -44,7 +44,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "mypy", "black", "flake8", "flake8-black", "isort"]
+dev = ["pytest", "mypy", "black", "flake8", "flake8-black", "isort", "pytest-xdist"]
 bleurt = [
     "bleurt @ git+https://github.com/google-research/bleurt.git",
 ]
@@ -69,8 +69,13 @@ readme = {file = ["README.md", "LICENSE"]}
 [tool.setuptools.packages]
 find = {}
 
+[tool.setuptools.package-data]
+vdtk = ["*.gz"] # For CLIP vocab files
+
+
 [tool.setuptools]
 include-package-data = true
+license-files = ["*LICEN[CS]E*", "*COPYING*", "*NOTICE*", "*AUTHORS*"]
 
 [tool.mypy]
 disallow_untyped_defs = true
