@@ -3,7 +3,6 @@ from functools import lru_cache
 from typing import Any, List, Optional, Tuple
 
 import click
-import clip
 import numpy as np
 import rich
 import torch
@@ -13,6 +12,7 @@ from rich.table import Table
 
 from vdtk.data_utils import Sample, load_dataset
 from vdtk.score import _handle_baseline_index
+from vdtk.third_party.clip import clip
 from vdtk.utils.rich import baseline_column
 
 Result = List[

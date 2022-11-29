@@ -1,12 +1,12 @@
 from functools import lru_cache
 from typing import Any, Dict, List, Optional, Sequence, Union
 
-import clip
 import embeddings
 import torch
 from sentence_transformers import SentenceTransformer
 
 from vdtk.metrics.distribution.scorer import MetricScorer
+from vdtk.third_party.clip import clip
 
 
 # calculate MMD Distance with a Gaussian kernel

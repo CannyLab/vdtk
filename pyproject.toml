@@ -38,8 +38,9 @@ dependencies = [
     "POT >= 0.8",
     "rouge-score >= 0.1.2",
     "jdk4py >= 17.0.3.0",
-    "clip @ git+https://github.com/openai/CLIP.git",
     "mauve-text >= 0.3.0",
+    "ftfy >= 6.1.1",
+    "regex >= 2022.10.31",
 ]
 
 [project.optional-dependencies]
@@ -106,3 +107,10 @@ sections="FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
 [build-system]
 requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra"
+testpaths = [
+    "vdtk-test",
+]
