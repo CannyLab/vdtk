@@ -9,26 +9,27 @@ To use this tool, you can easily pip install with `pip install vdtk`.
 
 ## Data format
 
-In order to prepare datasets to work with this tool, datasets must be formatted as JSON files with the following schema
-```json
-// List of samples in the dataset
+In order to prepare datasets to work with this tool, datasets must be formatted as JSON files with the following schema:
+
+```python
+# List of samples in the dataset
 [
-    // JSON object for each sample
+    # JSON object for each sample
     {
-        "_id": "string", // A string ID for each sample. This can help keep track of samples during use.
-        "split": "string", // A string corresponding to the split of the data. Default splits are "train", "validate" and "test"
+        "_id": "string", # A string ID for each sample. This can help keep track of samples during use.
+        "split": "string", # A string corresponding to the split of the data. Default splits are "train", "validate" and "test"
         "references": [
-            // List of string references
+            # List of string references
             "reference 1...",
             "reference 2...",
         ],
         "candidates": [
-            // List of string candidates (Optional)
+            # List of string candidates (Optional)
             "candidate 1...",
             "candidate 2...",
         ],
-        "media_path": "string", // (Optional) Path to the image/video (for image/video based metrics, recall experiemnts, etc.)
-        "metadata": {} // Any JSON object. This field is not used by the toolkit at this time.
+        "media_path": "string", # (Optional) Path to the image/video (for image/video based metrics, recall experiemnts, etc.)
+        "metadata": {} # Any JSON object. This field is not used by the toolkit at this time.
     }
 ]
 ```
