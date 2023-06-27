@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import List, Optional, Tuple
 
@@ -31,7 +32,8 @@ def compute_object_roverlap(
     query_objects = set([token.text for token in query_doc if token.pos_ in POS])
     targets_objects = set([token.text for token in targets_doc if token.pos_ in POS])
     # Return the recall
-    return len(set(query_objects).intersection(set(targets_objects))) / len(set(targets_objects))
+    print(query_objects, targets_objects)
+    return len(set(query_objects).intersection(set(targets_objects))) / (len(set(targets_objects)) + 1e-8)
 
 
 def compute_object_rdistance(
@@ -93,6 +95,10 @@ def content_recall(
         if split is not None:
             # Filter the data for the correct split
             data = [s for s in data if s.split == split]
+
+        if len(data) == 0:
+            logging.error(f"Dataset {ds} has no samples for split {split}.")
+            continue
 
         noun_recall = [
             [

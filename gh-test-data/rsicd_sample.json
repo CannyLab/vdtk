@@ -1,0 +1,1003 @@
+{
+"images": [
+{
+"filename": "airport_1.jpg",
+"imgid": 0,
+"sentences": [
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"next",
+"to",
+"a",
+"long",
+"building",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked next to a long building in an airport .",
+"imgid": 0,
+"sentid": 0
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"next",
+"to",
+"a",
+"long",
+"building",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked next to a long building in an airport .",
+"imgid": 0,
+"sentid": 1
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"next",
+"to",
+"a",
+"long",
+"building",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked next to a long building in an airport .",
+"imgid": 0,
+"sentid": 2
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"next",
+"to",
+"a",
+"long",
+"building",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked next to a long building in an airport .",
+"imgid": 0,
+"sentid": 3
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"next",
+"to",
+"a",
+"long",
+"building",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked next to a long building in an airport .",
+"imgid": 0,
+"sentid": 4
+}
+],
+"split": "train",
+"sentids": [
+0,
+1,
+2,
+3,
+4
+]
+},
+{
+"filename": "airport_10.jpg",
+"imgid": 1,
+"sentences": [
+{
+"tokens": [
+"some",
+"planes",
+"are",
+"parked",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "some planes are parked in an airport .",
+"imgid": 1,
+"sentid": 5
+},
+{
+"tokens": [
+"the",
+"airport",
+"here",
+"is",
+"full",
+"of",
+"airplanes",
+"and",
+"containers",
+"."
+],
+"raw": "the airport here is full of airplanes and containers .",
+"imgid": 1,
+"sentid": 6
+},
+{
+"tokens": [
+"the",
+"airport",
+"here",
+"is",
+"full",
+"of",
+"airplanes",
+"and",
+"containers",
+"."
+],
+"raw": "the airport here is full of airplanes and containers .",
+"imgid": 1,
+"sentid": 7
+},
+{
+"tokens": [
+"some",
+"planes",
+"are",
+"parked",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "some planes are parked in an airport .",
+"imgid": 1,
+"sentid": 8
+},
+{
+"tokens": [
+"some",
+"planes",
+"are",
+"parked",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "some planes are parked in an airport .",
+"imgid": 1,
+"sentid": 9
+}
+],
+"split": "train",
+"sentids": [
+5,
+6,
+7,
+8,
+9
+]
+},
+{
+"filename": "airport_100.jpg",
+"imgid": 2,
+"sentences": [
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"in",
+"an",
+"airport",
+"near",
+"many",
+"runways",
+"."
+],
+"raw": "many planes are parked in an airport near many runways .",
+"imgid": 2,
+"sentid": 10
+},
+{
+"tokens": [
+"there",
+"are",
+"many",
+"planes",
+"with",
+"same",
+"size",
+"in",
+"the",
+"airport",
+"."
+],
+"raw": "there are many planes with same size in the airport .",
+"imgid": 2,
+"sentid": 11
+},
+{
+"tokens": [
+"there",
+"are",
+"many",
+"planes",
+"with",
+"same",
+"size",
+"in",
+"the",
+"airport",
+"."
+],
+"raw": "there are many planes with same size in the airport .",
+"imgid": 2,
+"sentid": 12
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"in",
+"an",
+"airport",
+"near",
+"many",
+"runways",
+"."
+],
+"raw": "many planes are parked in an airport near many runways .",
+"imgid": 2,
+"sentid": 13
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"in",
+"an",
+"airport",
+"near",
+"many",
+"runways",
+"."
+],
+"raw": "many planes are parked in an airport near many runways .",
+"imgid": 2,
+"sentid": 14
+}
+],
+"split": "train",
+"sentids": [
+10,
+11,
+12,
+13,
+14
+]
+},
+{
+"filename": "airport_101.jpg",
+"imgid": 3,
+"sentences": [
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"near",
+"a",
+"large",
+"building",
+"on",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked near a large building on an airport .",
+"imgid": 3,
+"sentid": 15
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"near",
+"a",
+"large",
+"building",
+"on",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked near a large building on an airport .",
+"imgid": 3,
+"sentid": 16
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"near",
+"a",
+"large",
+"building",
+"on",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked near a large building on an airport .",
+"imgid": 3,
+"sentid": 17
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"near",
+"a",
+"large",
+"building",
+"on",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked near a large building on an airport .",
+"imgid": 3,
+"sentid": 18
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"near",
+"a",
+"large",
+"building",
+"on",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked near a large building on an airport .",
+"imgid": 3,
+"sentid": 19
+}
+],
+"split": "train",
+"sentids": [
+15,
+16,
+17,
+18,
+19
+]
+},
+{
+"filename": "airport_102.jpg",
+"imgid": 4,
+"sentences": [
+{
+"tokens": [
+"several",
+"buildings",
+"and",
+"green",
+"trees",
+"are",
+"around",
+"a",
+"piece",
+"of",
+"bare",
+"land",
+"."
+],
+"raw": "several buildings and green trees are around a piece of bare land.",
+"imgid": 4,
+"sentid": 20
+},
+{
+"tokens": [
+"some",
+"planes",
+"are",
+"parked",
+"near",
+"an",
+"airport",
+"with",
+"parking",
+"lot",
+"."
+],
+"raw": "some planes are parked near an airport with parking lot .",
+"imgid": 4,
+"sentid": 21
+},
+{
+"tokens": [
+"some",
+"planes",
+"are",
+"parked",
+"near",
+"an",
+"airport",
+"with",
+"parking",
+"lot",
+"."
+],
+"raw": "some planes are parked near an airport with parking lot .",
+"imgid": 4,
+"sentid": 22
+},
+{
+"tokens": [
+"several",
+"buildings",
+"and",
+"green",
+"trees",
+"are",
+"around",
+"a",
+"piece",
+"of",
+"bare",
+"land",
+"."
+],
+"raw": "several buildings and green trees are around a piece of bare land.",
+"imgid": 4,
+"sentid": 23
+},
+{
+"tokens": [
+"several",
+"buildings",
+"and",
+"green",
+"trees",
+"are",
+"around",
+"a",
+"piece",
+"of",
+"bare",
+"land",
+"."
+],
+"raw": "several buildings and green trees are around a piece of bare land.",
+"imgid": 4,
+"sentid": 24
+}
+],
+"split": "train",
+"sentids": [
+20,
+21,
+22,
+23,
+24
+]
+},
+{
+"filename": "airport_103.jpg",
+"imgid": 5,
+"sentences": [
+{
+"tokens": [
+"some",
+"green",
+"trees",
+"are",
+"near",
+"a",
+"large",
+"piece",
+"of",
+"bare",
+"land",
+"."
+],
+"raw": "some green trees are near a large piece of bare land.",
+"imgid": 5,
+"sentid": 25
+},
+{
+"tokens": [
+"some",
+"planes",
+"are",
+"parked",
+"near",
+"an",
+"airport",
+"with",
+"parking",
+"lot",
+"."
+],
+"raw": "some planes are parked near an airport with parking lot .",
+"imgid": 5,
+"sentid": 26
+},
+{
+"tokens": [
+"some",
+"planes",
+"are",
+"parked",
+"near",
+"an",
+"airport",
+"with",
+"parking",
+"lot",
+"."
+],
+"raw": "some planes are parked near an airport with parking lot .",
+"imgid": 5,
+"sentid": 27
+},
+{
+"tokens": [
+"some",
+"green",
+"trees",
+"are",
+"near",
+"a",
+"large",
+"piece",
+"of",
+"bare",
+"land",
+"."
+],
+"raw": "some green trees are near a large piece of bare land.",
+"imgid": 5,
+"sentid": 28
+},
+{
+"tokens": [
+"some",
+"green",
+"trees",
+"are",
+"near",
+"a",
+"large",
+"piece",
+"of",
+"bare",
+"land",
+"."
+],
+"raw": "some green trees are near a large piece of bare land.",
+"imgid": 5,
+"sentid": 29
+}
+],
+"split": "train",
+"sentids": [
+25,
+26,
+27,
+28,
+29
+]
+},
+{
+"filename": "airport_104.jpg",
+"imgid": 6,
+"sentences": [
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"between",
+"several",
+"buildings",
+"and",
+"many",
+"runways",
+"."
+],
+"raw": "many planes are parked between several buildings and many runways .",
+"imgid": 6,
+"sentid": 30
+},
+{
+"tokens": [
+"several",
+"runways",
+"are",
+"scattered",
+"in",
+"the",
+"airport",
+"while",
+"every",
+"plane",
+"is",
+"on",
+"their",
+"own",
+"position",
+"."
+],
+"raw": "several runways are scattered in the airport while every plane is on their own position .",
+"imgid": 6,
+"sentid": 31
+},
+{
+"tokens": [
+"several",
+"runways",
+"are",
+"scattered",
+"in",
+"the",
+"airport",
+"while",
+"every",
+"plane",
+"is",
+"on",
+"their",
+"own",
+"position",
+"."
+],
+"raw": "several runways are scattered in the airport while every plane is on their own position .",
+"imgid": 6,
+"sentid": 32
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"between",
+"several",
+"buildings",
+"and",
+"many",
+"runways",
+"."
+],
+"raw": "many planes are parked between several buildings and many runways .",
+"imgid": 6,
+"sentid": 33
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"between",
+"several",
+"buildings",
+"and",
+"many",
+"runways",
+"."
+],
+"raw": "many planes are parked between several buildings and many runways .",
+"imgid": 6,
+"sentid": 34
+}
+],
+"split": "train",
+"sentids": [
+30,
+31,
+32,
+33,
+34
+]
+},
+{
+"filename": "airport_105.jpg",
+"imgid": 7,
+"sentences": [
+{
+"tokens": [
+"many",
+"planes",
+"and",
+"buildings",
+"are",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "many planes and buildings are in an airport .",
+"imgid": 7,
+"sentid": 35
+},
+{
+"tokens": [
+"a",
+"lot",
+"of",
+"airplanes",
+"are",
+"parked",
+"in",
+"this",
+"complex",
+"airport",
+"surrounded",
+"by",
+"farmland",
+"."
+],
+"raw": "a lot of airplanes are parked in this complex airport surrounded by farmland .",
+"imgid": 7,
+"sentid": 36
+},
+{
+"tokens": [
+"numerous",
+"airplanes",
+"are",
+"parked",
+"at",
+"this",
+"grand",
+"airport",
+",",
+"made",
+"up",
+"of",
+"several",
+"terminal",
+"buildings",
+"."
+],
+"raw": "numerous airplanes are parked at this grand airport, made up of several terminal buildings .",
+"imgid": 7,
+"sentid": 37
+},
+{
+"tokens": [
+"numerous",
+"airplanes",
+"are",
+"parked",
+"at",
+"this",
+"grand",
+"airport",
+",",
+"made",
+"up",
+"of",
+"several",
+"terminal",
+"buildings",
+"."
+],
+"raw": "numerous airplanes are parked at this grand airport, made up of several terminal buildings .",
+"imgid": 7,
+"sentid": 38
+},
+{
+"tokens": [
+"many",
+"planes",
+"and",
+"buildings",
+"are",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "many planes and buildings are in an airport .",
+"imgid": 7,
+"sentid": 39
+}
+],
+"split": "train",
+"sentids": [
+35,
+36,
+37,
+38,
+39
+]
+},
+{
+"filename": "airport_106.jpg",
+"imgid": 8,
+"sentences": [
+{
+"tokens": [
+"is",
+"a",
+"airport",
+"in",
+"the",
+"middle",
+"and",
+"many",
+"planes",
+"in",
+"it",
+"."
+],
+"raw": "is a airport in the middle and many planes in it .",
+"imgid": 8,
+"sentid": 40
+},
+{
+"tokens": [
+"a",
+"silver",
+"building",
+"in",
+"the",
+"middle",
+"while",
+"with",
+"many",
+"plane",
+"besides",
+"."
+],
+"raw": "a silver building in the middle while with many plane besides .",
+"imgid": 8,
+"sentid": 41
+},
+{
+"tokens": [
+"many",
+"black",
+"road",
+"on",
+"the",
+"either",
+"hand",
+"of",
+"the",
+"airport",
+"."
+],
+"raw": "many black road on the either hand of the airport .",
+"imgid": 8,
+"sentid": 42
+},
+{
+"tokens": [
+"many",
+"dark",
+"buildings",
+"besides",
+"the",
+"silver",
+"building",
+"while",
+"with",
+"many",
+"plane",
+"besides",
+"."
+],
+"raw": "many dark buildings besides the silver building while with many plane besides .",
+"imgid": 8,
+"sentid": 43
+},
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"near",
+"a",
+"large",
+"building",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked near a large building in an airport .",
+"imgid": 8,
+"sentid": 44
+}
+],
+"split": "train",
+"sentids": [
+40,
+41,
+42,
+43,
+44
+]
+},
+{
+"filename": "airport_107.jpg",
+"imgid": 9,
+"sentences": [
+{
+"tokens": [
+"many",
+"planes",
+"are",
+"parked",
+"near",
+"several",
+"buildings",
+"in",
+"an",
+"airport",
+"."
+],
+"raw": "many planes are parked near several buildings in an airport .",
+"imgid": 9,
+"sentid": 45
+}
+],
+"split": "train"
+}
+]
+}
+

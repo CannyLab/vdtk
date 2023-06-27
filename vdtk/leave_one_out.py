@@ -5,7 +5,15 @@ from typing import Any, Dict, List, Optional
 import click
 from mpire import WorkerPool
 from rich.console import Console
-from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, TimeRemainingColumn, track
+from rich.progress import (
+    BarColumn,
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+    track,
+)
 from rich.table import Table
 
 from vdtk.data_utils import load_dataset
@@ -56,6 +64,10 @@ def leave_one_out(
         data = [s for s in data if s.split == split]
     # Filter data for samples with references
     data = [s for s in data if s.references]
+
+    if len(data) == 0:
+        logging.error("No samples found!")
+        return
 
     # Generate the hypothesis datasets
     experiments = []

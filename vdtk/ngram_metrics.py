@@ -33,15 +33,24 @@ def _compute_ed(ls: int, evs_2: float, evs_3: float, evs_4: float) -> float:
 @click.option("--split", default=None, type=str, help="Split to evaluate")
 @click.option("--reference-key", default="references", type=str, help="Reference key to evaluate")
 @click.option("--candidates", default=False, is_flag=True, help="Evaluate candidates instead of references")
-def ngram_stats(dataset_path: str, split: Optional[str] = None, candidates: bool = False) -> None:
+def ngram_stats(
+    dataset_path: str,
+    split: Optional[str] = None,
+    candidates: bool = False,
+    reference_key: str = "references",
+) -> None:
 
     logging.info("Loading dataset...")
-    data = load_dataset(dataset_path)
+    data = load_dataset(dataset_path, reference_key=reference_key)
     if split is not None:
         # Filter the data for the correct split
         data = [s for s in data if s.split == split]
     # Filter data for samples with references
     data = [s for s in data if (s.references if not candidates else s.candidates)]
+
+    if len(data) == 0:
+        logging.error("No samples found!")
+        return
 
     # Build the n-gram language models
     logging.info("Tokenizing samples...")

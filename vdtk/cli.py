@@ -17,7 +17,7 @@ from vdtk.semantic_variance import semantic_variance
 from vdtk.vocab_metrics import vocab_stats
 
 FORMAT = "%(message)s"
-logging.basicConfig(level=logging.WARNING, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
+logging.basicConfig(level=logging.DEBUG, format=FORMAT, datefmt="[%X]", handlers=[RichHandler()])
 
 # Deal with NLTK being too verbose
 warnings.filterwarnings("ignore")

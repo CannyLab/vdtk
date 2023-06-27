@@ -56,6 +56,14 @@ def coreset(dataset_path: str, train_split: str, test_split: str, metric: str = 
     # Get the test data
     test_data = [s for s in data if s.split == test_split]
 
+    if len(train_data) == 0:
+        logging.error("No training samples found!")
+        return
+
+    if len(test_data) == 0:
+        logging.error("No testing samples found!")
+        return
+
     # Compute the full set of hypotheses
     logging.info("Computing/tokenizing hypotheses...")
     hypotheses = list(
@@ -111,7 +119,7 @@ def coreset(dataset_path: str, train_split: str, test_split: str, metric: str = 
     table.add_column("Core-Set Required %")
 
     for f, s in zip(np.linspace(0, 1, num=intervals), cover_sizes):
-        table.add_row(f"{f:.2f}", str(s), f"{s * 100 /len(test_data):.2f}%")
+        table.add_row(f"{f:.2f}", str(s), f"{s * 100 /(len(test_data) + 1e-8):.2f}%")
 
     console = rich.console.Console()
     console.print()

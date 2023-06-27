@@ -97,7 +97,12 @@ class Sample:
         return self._candidate_embeddings
 
 
-def load_dataset(dataset_json_path: str, media_root: Optional[str] = None) -> List[Sample]:
+def load_dataset(
+    dataset_json_path: str,
+    media_root: Optional[str] = None,
+    reference_key: Optional[str] = None,
+    candidate_key: Optional[str] = None,
+) -> List[Sample]:
     """
     Loads the dataset from the json file.
     """
@@ -108,8 +113,8 @@ def load_dataset(dataset_json_path: str, media_root: Optional[str] = None) -> Li
         Sample(
             _id=sample.get("_id", None),
             split=sample.get("split", None),
-            references=sample.get("references", []),
-            candidates=sample.get("candidates", []),
+            references=sample.get(reference_key or "references", []),
+            candidates=sample.get(candidate_key or "candidates", []),
             media_path=os.path.join(media_root, sample.get("media_path", None))
             if media_root is not None and sample.get("media_path", None) is not None
             else sample.get("media_path", sample.get("image_path", None)),

@@ -1,3 +1,4 @@
+import logging
 import os
 from functools import lru_cache
 from typing import Any, List, Optional, Tuple
@@ -128,6 +129,10 @@ def clip_recall(
         if split is not None:
             # Filter the data for the correct split
             data = [s for s in data if s.split == split]
+
+        if len(data) == 0:
+            logging.error(f"Dataset {ds} has no samples")
+            continue
 
         # Compute the features
         image_feature_db = _get_image_feature_db(data)

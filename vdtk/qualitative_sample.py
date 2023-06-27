@@ -30,6 +30,10 @@ def qualitative_sample(
     # Filter data for samples with references
     data = [s for s in data if (s.references if not candidates else s.candidates)]
 
+    if len(data) == 0:
+        logging.error("No samples found!")
+        return
+
     console = rich.console.Console()
     with console.capture() as capture:
         for _ in track(list(range(samples)), description="Computing stats...", transient=True):
