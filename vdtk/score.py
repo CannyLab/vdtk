@@ -158,9 +158,17 @@ def _ciderd(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[T
     return _pycoco_eval_cap_metric(Cider, dataset_paths, split)
 
 
-def _bleu(
-    dataset_paths: Sequence[str], split: Optional[str] = None
-) -> List[Tuple[Tuple[float, float, float, float], Tuple[List[float], List[float], List[float], List[float]]]]:
+def _bleurt(*args, **kwargs):
+    # NOTE: tensorflow occupies all the GPU memory, and in "all" mode,
+    # the following torch code will fail with OOM
+    # so we need to use a single sub-process.
+    from multiprocessing import Pool
+
+    pool = Pool(1)
+    scores = pool.apply_async(__bleurt, args=args, kwds=kwargs)
+    return scores.get()
+
+def __bleurt(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tuple[float, List[float]]]:
     # BLEU is a special case because it generates 4 scores
     tokenizer = PTBTokenizer()
 
