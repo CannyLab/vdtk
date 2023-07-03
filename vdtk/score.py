@@ -217,7 +217,17 @@ def _spice(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tu
     return _pycoco_eval_cap_metric(Spice, dataset_paths, split)
 
 
-def _bleurt(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tuple[float, List[float]]]:
+def _bleurt(*args, **kwargs):
+    # NOTE: tensorflow occupies all the GPU memory, and in "all" mode,
+    # the following torch code will fail with OOM.
+    # Thus we need to use a single sub-process.
+    from multiprocessing import Pool
+
+    with Pool(1) as pool:
+        return pool.apply_async(__bleurt, args=args, kwds=kwargs).get()
+
+
+def __bleurt(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tuple[float, List[float]]]:
 
     if bleurt_score is None:
         raise ImportError("BLEURT requires the bleurt package to be installed.")
