@@ -227,7 +227,7 @@ def _bleurt(*args, **kwargs):
         return pool.apply_async(__bleurt, args=args, kwds=kwargs).get()
 
 
-ef __bleurt(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tuple[float, List[float]]]:
+def __bleurt(dataset_paths: Sequence[str], split: Optional[str] = None) -> List[Tuple[float, List[float]]]:
 
     if bleurt_score is None:
         raise ImportError("BLEURT requires the bleurt package to be installed.")
