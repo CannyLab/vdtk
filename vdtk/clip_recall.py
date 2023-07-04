@@ -1,7 +1,7 @@
 import logging
 import os
 from functools import lru_cache
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Union
 
 import click
 import numpy as np
@@ -11,7 +11,7 @@ from PIL import Image
 from rich.progress import track
 from rich.table import Table
 
-from vdtk.data_utils import Sample, load_dataset
+from vdtk.data_utils import Sample, b64_to_bin, load_dataset
 from vdtk.score import _handle_baseline_index
 from vdtk.third_party.clip import clip
 from vdtk.utils.rich import baseline_column
@@ -32,9 +32,9 @@ def clip_model() -> Tuple[Any, Any, Any]:
 
 
 @lru_cache
-def _get_feature(media_path: str) -> torch.Tensor:
+def _get_feature(media: Union[str, bytes]) -> torch.Tensor:
     model, preprocess, device = clip_model()
-    image = preprocess(Image.open(media_path)).unsqueeze(0).to(device)
+    image = preprocess(Image.open(media)).unsqueeze(0).to(device)
     with torch.no_grad():
         image_features = model.encode_image(image)
         image_features = image_features / image_features.norm(dim=-1, keepdim=True)
@@ -44,7 +44,12 @@ def _get_feature(media_path: str) -> torch.Tensor:
 def _get_image_feature_db(data: List[Sample]) -> torch.Tensor:
     features = []
     for sample in track(data, description="Featurizing dataset", transient=True):
-        features.append(_get_feature(sample.media_path))
+        # FIXME: If media is both b64 and path, only the b64 is used
+        # we should raise an error or warning if both are present
+        if sample.media_b64 is not None:
+            features.append(_get_feature(b64_to_bin(sample.media_b64)))
+        elif sample.media_path is not None:
+            features.append(_get_feature(sample.media_path))
     return torch.stack(features).to("cpu" if not torch.cuda.is_available() else "cuda")
 
 

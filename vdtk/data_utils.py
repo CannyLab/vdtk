@@ -1,3 +1,5 @@
+import base64
+import io
 import json
 import os
 from dataclasses import dataclass, field
@@ -38,6 +40,7 @@ class Sample:
     references: List[str] = field(default_factory=list)
     candidates: List[str] = field(default_factory=list)
     media_path: Optional[str] = None
+    media_b64: Optional[str] = None
     metadata: Optional[Any] = field(default=None)
 
     # Things that are created on the fly
@@ -118,7 +121,15 @@ def load_dataset(
             media_path=os.path.join(media_root, sample.get("media_path", None))
             if media_root is not None and sample.get("media_path", None) is not None
             else sample.get("media_path", sample.get("image_path", None)),
+            media_b64=sample.get("media_b64", None),
             metadata=sample.get("metadata", None),
         )
         for sample in dataset
     ]
+
+
+def b64_to_bin(base64_bin_str: str) -> bytes:
+    """
+    Decodes a base64 binary string to a binary string.
+    """
+    return io.BytesIO(base64.b64decode(base64_bin_str))
