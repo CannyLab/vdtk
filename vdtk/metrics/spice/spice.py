@@ -54,54 +54,76 @@ class Spice:
         temp_dir = os.path.join(cwd, TEMP_DIR)
         if not os.path.exists(temp_dir):
             os.makedirs(temp_dir)
-        in_file = tempfile.NamedTemporaryFile(delete=False, dir=temp_dir, mode="w+")
-        json.dump(input_data, in_file, indent=2)
-        in_file.close()
 
-        # Start job
-        out_file = tempfile.NamedTemporaryFile(delete=False, dir=temp_dir)
-        out_file.close()
         cache_dir = os.path.join(cwd, CACHE_DIR)
         if not os.path.exists(cache_dir):
             os.makedirs(cache_dir)
-        spice_cmd = [
-            str(JAVA),
-            "--add-opens",
-            "java.base/java.lang=ALL-UNNAMED",
-            "--add-opens",
-            "java.base/java.math=ALL-UNNAMED",
-            "--add-opens",
-            "java.base/java.util=ALL-UNNAMED",
-            "--add-opens",
-            "java.base/java.util.concurrent=ALL-UNNAMED",
-            "--add-opens",
-            "java.base/java.net=ALL-UNNAMED",
-            "--add-opens",
-            "java.base/java.text=ALL-UNNAMED",
-            "-Xmx8G",
-            "-cp",
-            SPICE_JAR,
-            "edu.anu.spice.SpiceScorer",
-            in_file.name,
-            "-cache",
-            cache_dir,
-            "-out",
-            out_file.name,
-            "-subset",
-            "-silent",
-        ]
-        subprocess.check_call(
-            spice_cmd,
-            cwd=os.path.dirname(os.path.abspath(__file__)),
-            stderr=subprocess.DEVNULL,
-            stdout=subprocess.DEVNULL,
-        )
 
-        # Read and process results
-        with open(out_file.name) as data_file:
-            results = json.load(data_file)
-        os.remove(in_file.name)
-        os.remove(out_file.name)
+        import contextlib
+
+        @contextlib.contextmanager
+        def named_temp_file_ensure_deleted(*args, **kwargs):
+            f = None
+            try:
+                f = tempfile.NamedTemporaryFile(*args, **kwargs)
+                yield f
+            except Exception as e:
+                raise e
+            finally:
+                if f is None:
+                    return
+                f.close()
+                if os.path.exists(f.name):
+                    os.remove(f.name)
+
+        with named_temp_file_ensure_deleted(
+            delete=False, dir=temp_dir, mode="w+"
+        ) as in_file, named_temp_file_ensure_deleted(
+            delete=False, dir=temp_dir
+        ) as out_file, tempfile.TemporaryDirectory(
+            dir=cache_dir
+        ) as cache_dir:
+            # Start job
+            json.dump(input_data, in_file, indent=2)
+            in_file.close()
+            out_file.close()
+
+            spice_cmd = [
+                str(JAVA),
+                "--add-opens",
+                "java.base/java.lang=ALL-UNNAMED",
+                "--add-opens",
+                "java.base/java.math=ALL-UNNAMED",
+                "--add-opens",
+                "java.base/java.util=ALL-UNNAMED",
+                "--add-opens",
+                "java.base/java.util.concurrent=ALL-UNNAMED",
+                "--add-opens",
+                "java.base/java.net=ALL-UNNAMED",
+                "--add-opens",
+                "java.base/java.text=ALL-UNNAMED",
+                "-Xmx8G",
+                "-cp",
+                SPICE_JAR,
+                "edu.anu.spice.SpiceScorer",
+                in_file.name,
+                "-cache",
+                cache_dir,
+                "-out",
+                out_file.name,
+                "-subset",
+                "-silent",
+            ]
+            subprocess.check_call(
+                spice_cmd,
+                cwd=os.path.dirname(os.path.abspath(__file__)),
+                stderr=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+            )
+
+            # Read and process results
+            with open(out_file.name) as data_file:
+                results = json.load(data_file)
 
         imgId_to_scores = {}
         spice_scores = []
